@@ -1,0 +1,29 @@
+{
+  "schema_version": "0.1",
+  "working_title": "Audits for What? Decision-Specific Validation Budgets for Retrieval under Distribution Shift",
+  "primary_metric": "set_f1",
+  "secondary_metric": "ndcg_at_10_if_available",
+  "core_budgets_audited_queries": [5, 10, 20],
+  "extended_budgets_audited_queries": [50, 100],
+  "repeats_per_dataset_budget": 500,
+  "recalibration_tolerance": 0.005,
+  "selection_regret_tolerance": 0.01,
+  "required_success_probability": 0.9,
+  "selection_menu": ["ad_probe", "glob_probe", "trunc"],
+  "full_target_reference": "ad_c",
+  "datasets": [
+    "trec-covid",
+    "webis-touche2020",
+    "dbpedia-entity",
+    "nfcorpus",
+    "scifact",
+    "arguana",
+    "scidocs",
+    "fiqa",
+    "quora",
+    "nq",
+    "hotpotqa",
+    "fever",
+    "climate-fever"
+  ]
+}

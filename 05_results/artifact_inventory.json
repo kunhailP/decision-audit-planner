@@ -1,0 +1,72 @@
+{
+  "source": "/Users/baggeon-u/Documents/Codex/2026-08-20/new-chat/work/shift-study",
+  "git_commit": "ef825e1d35d58d178c50054122ccc9e9ab54012c",
+  "candidate_dir": {
+    "path": "/Users/baggeon-u/Documents/Codex/2026-08-20/new-chat/work/shift-study/runs/candidates",
+    "exists": false,
+    "csv_files": 0
+  },
+  "artifacts": {
+    "block1_confirm_per_query": {
+      "exists": true,
+      "path": "/Users/baggeon-u/Documents/Codex/2026-08-20/new-chat/work/shift-study/runs/block1_confirm/per_query.csv",
+      "rows": 13,
+      "columns": [
+        "ad_probe",
+        "glob_probe",
+        "trunc",
+        "select3",
+        "select2",
+        "select3_mean",
+        "ad",
+        "ad_c",
+        "glob",
+        "dataset",
+        "regret3",
+        "regret3_max",
+        "c_star",
+        "untouched"
+      ],
+      "has_query_id": false,
+      "has_repeat_id": false
+    },
+    "pilot_per_query_v7": {
+      "exists": true,
+      "path": "/Users/baggeon-u/Documents/Codex/2026-08-20/new-chat/work/shift-study/runs/pilot/per_query_v7.csv",
+      "rows": 3677,
+      "columns": [
+        "dataset",
+        "qid",
+        "f_none",
+        "f_all",
+        "f_glob",
+        "f_ad",
+        "f_or"
+      ],
+      "has_query_id": true,
+      "has_repeat_id": false
+    },
+    "h1_mechanism_per_query": {
+      "exists": true,
+      "path": "/Users/baggeon-u/Documents/Codex/2026-08-20/new-chat/work/shift-study/runs/h1_mechanism/per_query.csv",
+      "rows": 33234,
+      "columns": [
+        "dataset",
+        "qid",
+        "nG",
+        "n_add",
+        "p_add",
+        "tau_q",
+        "margin",
+        "dF1"
+      ],
+      "has_query_id": true,
+      "has_repeat_id": false
+    }
+  },
+  "budget_curve_ready": false,
+  "notes": [
+    "block1_confirm/per_query.csv is expected to be dataset-level despite its name",
+    "candidate-level inputs are required to rerun the probe protocol for new k values"
+  ]
+}

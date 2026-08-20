@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.venv/
+
+# Large, generated, or potentially restricted artifacts
+data/
+runs/candidates/
+05_results/raw/
+09_artifact/private/
+
+# Keep manifests and small fixtures under version control
+!09_artifact/fixtures/

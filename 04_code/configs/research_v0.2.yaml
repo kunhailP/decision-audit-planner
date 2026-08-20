@@ -1,0 +1,52 @@
+config_version: "0.2-draft"
+status: not_frozen
+
+decisions:
+  recalibration:
+    enabled: true
+    tolerance: null
+  selection:
+    enabled: true
+    epsilon_regret: null
+
+risk:
+  alpha: null
+  interval_method: to_be_selected_after_simulation_not_target_results
+  sequential_correction: required
+
+audit:
+  sampling: simple_random_query
+  initial_queries: null
+  batch_queries: null
+  maximum_queries: null
+  report_query_budget: true
+  report_pair_judgment_budget: only_when_observed_or_reconstructed
+
+evaluation:
+  primary_metric: set_f1
+  sensitivity_metrics:
+    - ndcg_at_10
+    - recall_at_k
+  repeats: null
+  development_collections: beir_legacy_13
+  prospective_collection: null
+
+policies:
+  menu:
+    - ad_probe
+    - glob_probe
+    - trunc
+  full_target_reference: ad_c
+  reference_label: full_target_scalar_reference
+
+outputs:
+  preserve_audit_events: true
+  preserve_decision_trace: true
+  preserve_per_repeat: true
+  include_probe_ids: true
+  include_evaluation_ids: true
+
+freeze:
+  code_commit: null
+  data_hash: null
+  frozen_at: null

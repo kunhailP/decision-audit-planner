@@ -1,0 +1,61 @@
+registry_version: "0.2"
+updated: "2026-08-20"
+
+collections:
+  beir_legacy_13:
+    role: development_and_retrospective_only
+    exposure: all_collections_seen_in_prior_analysis
+    confirmatory: false
+    source_version: to_be_pinned
+    qrels_regime: heterogeneous_and_partly_incomplete
+    candidate_artifacts: missing
+    allowed_claims:
+      - debugging
+      - heterogeneity
+      - retrospective_budget_curves
+    prohibited_claims:
+      - prospective_confirmation
+      - real_human_annotation_cost_without_reconstruction
+
+  prospective_primary:
+    role: locked_external_validation
+    status: not_selected
+    confirmatory: true_after_freeze_only
+    required_properties:
+      - not_used_in_method_development
+      - versioned_and_licensed
+      - reproducible_candidate_pool
+      - documented_judgment_depth
+      - enough_queries_for_sequential_budget_grid
+      - no_cross_target_training_leakage
+    candidate_families:
+      - TREC_Deep_Learning
+      - BRIGHT
+      - LongEval
+    selection_rule: choose_after_provenance_and_judgment_audit_not_after_results
+
+required_metadata:
+  - collection_id
+  - version_or_release_date
+  - source_url
+  - license
+  - file_checksum
+  - query_count
+  - candidate_generation_method
+  - candidate_pool_depth
+  - qrels_levels
+  - judged_fraction
+  - unjudged_handling
+  - development_or_holdout_role
+  - first_access_timestamp
+
+freeze_requirements:
+  - data_and_qrels_hashes
+  - retriever_and_model_versions
+  - policy_menu
+  - metrics
+  - tolerances
+  - risk_level
+  - maximum_budget
+  - stopping_rule
+  - code_commit

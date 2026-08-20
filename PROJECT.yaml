@@ -1,0 +1,48 @@
+project:
+  id: decision_specific_audit
+  version: "0.2"
+  status: pre_method_freeze
+  active_claim: decision_specific_validation_requires_decision_specific_planning
+
+scope:
+  field: machine_learning_evaluation_and_information_retrieval
+  primary_decisions:
+    - recalibration
+    - policy_selection
+  planner_outputs:
+    - act
+    - collect_more_audits
+    - abstain
+  excluded_from_core:
+    - political_science_application
+    - lobbying_application
+    - new_retriever_training
+    - general_uncertainty_framework
+
+targets:
+  scientific_bar:
+    - ICML_main_track_evaluation
+    - NeurIPS_or_ICLR_main_track
+    - SIGIR_full_paper
+  publication_branch:
+    - top_venue_if_C2_to_C4_claims_hold
+    - TMLR_if_method_is_rigorous_but_broad_significance_is_limited
+
+source:
+  repository: https://github.com/kunhailP/shift-study
+  commit: ef825e1d35d58d178c50054122ccc9e9ab54012c
+
+current_blocker:
+  id: missing_candidate_artifacts
+  consequence: budget_curves_and_planner_validation_cannot_be_reproduced
+
+resource_constraints:
+  local_free_space_gib_observed: 27
+  legacy_readme_raw_data_estimate_gib: 130
+  candidate_builder_requires_cuda: true
+  local_full_regeneration_feasible: false
+  safe_next_action: recover_original_artifacts_or_use_external_compute_and_storage
+
+next_gate:
+  id: G1
+  exit_condition: candidate_level_artifacts_have_provenance_checksums_and_a_validated_schema
