@@ -22,12 +22,16 @@ DXW 발표의 목적은 완성되지 않은 flagship claim을 과장하는 것�
 
 ## Track B — flagship paper
 
+대규모 계산은 `POD_HANDOFF.md`에 따라 별도 Pod에서 실행한다. 로컬은 연구설계와 source of truth를 유지하고, Pod는 고정된 입력을 실행해 검증 가능한 artifact를 반환한다.
+
 ### Phase 1: Evidence recovery
 
 - candidate artifact를 백업에서 찾거나 원 pipeline으로 재생성
 - source commit, dataset version, retrieval model, checksum 기록
 - query/pair-level schema 검증
 - 기존 headline number를 row-level artifact에서 재생성
+
+실행 주체: Pod P0–P1. 로컬은 반환 bundle의 hash, schema, leakage를 검증한다.
 
 ### Phase 2: Method implementation
 
@@ -36,6 +40,8 @@ DXW 발표의 목적은 완성되지 않은 flagship claim을 과장하는 것�
 - simultaneous comparison for multiple policies
 - `act / more audits / abstain` 출력
 - coverage와 ε-regret을 검증하는 simulation
+
+구현·작은 fixture는 로컬, GPU/대규모 simulation은 Pod P3에서 수행한다.
 
 ### Phase 3: Development study
 

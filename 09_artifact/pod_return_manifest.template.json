@@ -1,0 +1,40 @@
+{
+  "manifest_version": "0.1",
+  "experiment_id": null,
+  "run_started_at": null,
+  "run_finished_at": null,
+  "status": "success|partial|failed",
+  "inputs": {
+    "hub_commit": null,
+    "source_commit": "ef825e1d35d58d178c50054122ccc9e9ab54012c",
+    "config_sha256": null,
+    "dataset_versions": {},
+    "dataset_sha256": {},
+    "model_revisions": {},
+    "seed_rule": null
+  },
+  "environment": {
+    "python": null,
+    "cuda": null,
+    "gpu": null,
+    "os": null,
+    "packages_file": "environment.txt"
+  },
+  "outputs": [
+    {
+      "path": null,
+      "sha256": null,
+      "rows": null,
+      "bytes": null,
+      "schema_version": null
+    }
+  ],
+  "checks": {
+    "schema_valid": null,
+    "no_probe_evaluation_overlap": null,
+    "unique_repeat_ids": null,
+    "summary_reproduced": null
+  },
+  "deviations_file": "deviations.md",
+  "failure_log": null
+}

@@ -1,7 +1,7 @@
 project:
   id: decision_specific_audit
   version: "0.2"
-  status: pre_method_freeze
+  status: dual_track_pre_method_freeze
   active_claim: decision_specific_validation_requires_decision_specific_planning
 
 scope:
@@ -32,7 +32,20 @@ source:
   repository: https://github.com/kunhailP/shift-study
   commit: ef825e1d35d58d178c50054122ccc9e9ab54012c
 
-current_blocker:
+compute_track:
+  environment: external_pod
+  status: assigned_by_researcher
+  next_run: P0_environment_smoke_then_P1_legacy_reproduction
+  contract: 00_admin/POD_HANDOFF.md
+
+local_track:
+  status: active
+  next_work:
+    - freeze_method_estimands_and_losses
+    - complete_nearest_prior_work_audit
+    - build_small_fixture_and_bundle_validator
+
+evidence_dependency:
   id: missing_candidate_artifacts
   consequence: budget_curves_and_planner_validation_cannot_be_reproduced
 
@@ -41,8 +54,8 @@ resource_constraints:
   legacy_readme_raw_data_estimate_gib: 130
   candidate_builder_requires_cuda: true
   local_full_regeneration_feasible: false
-  safe_next_action: recover_original_artifacts_or_use_external_compute_and_storage
+  execution_owner: external_pod
 
 next_gate:
   id: G1
-  exit_condition: candidate_level_artifacts_have_provenance_checksums_and_a_validated_schema
+  exit_condition: pod_returned_candidate_artifacts_have_provenance_checksums_and_a_validated_schema

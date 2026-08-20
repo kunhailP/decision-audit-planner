@@ -17,6 +17,7 @@ REQUIRED = [
     "00_admin/ROADMAP.md",
     "00_admin/QUALITY_GATES.md",
     "00_admin/SUBMISSION_STRATEGY.md",
+    "00_admin/POD_HANDOFF.md",
     "01_design/METHOD_SPEC_v0.2.md",
     "01_design/CLAIM_EVIDENCE_MATRIX.md",
     "02_literature/RELATED_WORK_MATRIX.md",
@@ -24,6 +25,7 @@ REQUIRED = [
     "04_code/CONTRACTS.md",
     "04_code/configs/research_v0.2.yaml",
     "09_artifact/README.md",
+    "09_artifact/pod_return_manifest.template.json",
     "10_research_program/README.md",
 ]
 

@@ -104,3 +104,7 @@ row-level 결과에서만 만든다. 수동 입력 숫자를 허용하지 않는
 ## Failure behavior
 
 입력 누락, schema mismatch, checksum mismatch가 있으면 빈 결과를 저장하지 말고 non-zero exit로 중단한다. 실패 원인은 run manifest에 남긴다.
+
+## Pod boundary
+
+대규모 실행의 입력·반환계약은 `../00_admin/POD_HANDOFF.md`를 따른다. Pod 반환물은 `../09_artifact/pod_return_manifest.template.json` 형식의 manifest를 가져야 하며, 로컬 검증을 통과하기 전에는 결과 폴더로 승격하지 않는다.

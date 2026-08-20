@@ -66,7 +66,12 @@ TMLR은 기존 archival paper와 겹치는 확장 투고를 받지 않는다. �
 6. **G5 — Artifact audit:** 빈 환경에서 headline 결과와 그림 재생성
 7. **G6 — Submission decision:** 결과에 따라 venue branch 선택
 
-현재는 **G1 진입 전**이다. candidate-level evidence가 없으므로 headline 실험을 새로 해석하거나 그림을 만드는 작업은 금지한다.
+현재는 두 트랙이 병렬로 진행된다.
+
+- **Local track:** method freeze, literature/novelty audit, test와 논문 구조
+- **Pod track:** candidate 복구·재생성, 대규모 반복실험, artifact bundle 반환
+
+Pod 실행계약은 `00_admin/POD_HANDOFF.md`가 기준이다. candidate-level evidence가 돌아오기 전에는 headline 실증결과를 갱신하지 않지만, 로컬의 설계·문헌·fixture 작업은 계속 진행한다.
 
 ## Non-negotiable rules
 
@@ -85,6 +90,7 @@ TMLR은 기존 archival paper와 겹치는 확장 투고를 받지 않는다. �
 3. `01_design/CLAIM_EVIDENCE_MATRIX.md`
 4. `00_admin/QUALITY_GATES.md`
 5. `04_code/CONTRACTS.md`
+6. `00_admin/POD_HANDOFF.md`
 
 원자료는 직접 수정하지 않는다.
 

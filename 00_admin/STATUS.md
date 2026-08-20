@@ -12,7 +12,16 @@
 - [ ] tolerance, risk, sequential interval method를 simulation 전에 고정
 - [ ] candidate artifact 복구 또는 재생성
 
-현재 blocker는 문헌이나 문장력이 아니라 **candidate-level artifact 부재**다. 이 blocker가 해결되기 전에는 C1 이상의 실증 claim을 갱신하지 않는다.
+candidate-level artifact 생성은 연구자가 별도 Pod에서 진행한다. 따라서 이것은 로컬 작업 전체를 멈추는 blocker가 아니라 **Pod evidence dependency**다. 반환 전에는 C1 이상의 실증 claim을 갱신하지 않되, 로컬에서는 method freeze·문헌 audit·fixture/test 구현을 병렬 진행한다.
+
+## Dual-track execution
+
+- [x] Local–Pod 책임 경계 작성
+- [x] Pod P0–P4 실행 단계 정의
+- [x] Pod return manifest template 작성
+- [ ] P0/P1 입력 bundle의 code/config hash 고정
+- [ ] Pod P1 반환 artifact 검증
+- [ ] v0.2 planner용 P2/P3 runner 전달
 
 ## 완료
 

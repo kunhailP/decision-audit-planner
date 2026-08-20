@@ -94,3 +94,11 @@
 - `DXW_2026_shift_audit`을 유일한 활성 flagship 폴더로 지정한다.
 - 과거 정치·법학 프로젝트는 legacy/source material이며 현재 논문의 동기나 novelty로 자동 승계하지 않는다.
 - 새 작업은 claim–evidence matrix에 연결된 경우에만 core에 포함한다.
+
+## D-017 — 대규모 계산은 별도 Pod 트랙으로 분리한다
+
+- 날짜: 2026-08-20
+- 로컬 허브는 연구설계, 문헌, config freeze, validation, 논문을 담당한다.
+- Pod는 raw data, embedding, candidate, 반복실험, 실행환경 기록을 담당한다.
+- Pod에서 연구질문이나 성공기준을 수정하지 않는다.
+- 반환 artifact는 manifest, checksum, row-level output을 갖추고 로컬 검증 후에만 증거로 승격한다.
