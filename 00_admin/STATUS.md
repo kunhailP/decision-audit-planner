@@ -11,7 +11,9 @@
 - [x] M7 지표 민감도: recall에서 비대칭 방향 역전 확인 — C3 기제 강화 (`05_results/budget_curves_recall|_ndcg/`)
 - [x] 테스트 스위트 21개 all green (`04_code/tests/run_tests.py`) — legacy 재현·leakage·재생성 포함
 - [x] 논문 초안 v0.3 (`06_paper/DRAFT_v0.3.md`), prospective 프로토콜 v0.1 (`03_data/PROSPECTIVE_PROTOCOL_v0.1.md`)
-- [ ] Freeze 비준 (사용자) → 이후 G4 prospective collection lock (권고: TREC-DL run-set)
+- [x] Freeze 비준 (D-019, 사용자 위임) + prospective lock (cqadupstack-android, 다운로드 전 커밋)
+- [x] **P4 primary run 통과** — wrong-cert recal 0.00 / selection 0.08 ≤ α=0.1 (50 reps, `05_results/prospective_android/`)
+- [ ] Kaggle v3 백업, GitHub push(토큰 대기), Pod-A(G5 clean-room), Pod-B(BRIGHT)
 
 ## North-star update
 

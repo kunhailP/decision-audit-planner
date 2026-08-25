@@ -46,8 +46,13 @@ a collection never touched during development.
   validity requires cross-fitting (new empirical observation on why).
 - **C3 (mechanism)**: budget differences are explained by menu size × policy
   gap × per-query variance (F3), not by the decision label.
-- **C4 (generalization)**: pre-registered prospective protocol; *not claimed*
-  in this draft until the locked run (PROSPECTIVE_PROTOCOL_v0.1).
+- **C4 (generalization, first prospective evidence)**: on a collection never
+  touched during development (cqadupstack-android; rule-selected and locked
+  before download, lock sha256 7a00b578…), the frozen planner **passed the
+  pre-registered criterion for both decisions**: wrong-certificate rate 0.00
+  (recalibration) and 0.08 (selection) vs nominal α = 0.1 (50 repeats,
+  MC SE ≈ 0.042). One external collection; a second (BRIGHT) is contracted
+  for revision.
 
 ## 2. Setup
 
@@ -220,14 +225,37 @@ for fixed models; we scope abstention as a planner output, not a framework
 claim. (Full table: 02_literature/references_verified_2026-08-25.md; rule —
 no unverified citation enters the bibliography.)
 
-## 9. Limitations and prospective protocol
+## 9. Prospective validation (C4, primary run)
 
-All 13 collections were exposed during development (D-007): every empirical
-claim here is retrospective/diagnostic. C4 requires the locked prospective run
-(PROSPECTIVE_PROTOCOL_v0.1: primary = TREC-DL run-set based, GPU-free;
-secondary = BRIGHT via pod). nG requires complete judgment of a query's pool;
-our pair-budget axis is a pooled-qrels proxy. Certificates are empirically
-calibrated (bootstrap validity assumed), not finite-sample proven.
+Target: cqadupstack-android (699 eligible queries) — never used in any prior
+analysis, selected by a pre-committed rule (alphabetically first subforum) and
+locked, together with every planner hyperparameter and the success criterion,
+**before the data were downloaded** (lock sha256 7a00b578…). Training
+(probability model, τ transfer, truncation regressor) used only the 13
+development collections; the target contributed nothing to any fitting step.
+Single primary run, 50 repeat draws:
+
+| decision | act | abstain | mean T | wrong-cert | criterion (≤ α=0.1) |
+|---|---|---|---|---|---|
+| recalibration | 0.44 | 0.56 | 76.0 | **0.00** | PASS |
+| selection | 0.80 | 0.20 | 48.8 | **0.08** | PASS |
+
+The planner transferred: certificates stayed valid on a foreign collection,
+and where evidence was insufficient it abstained rather than certify — 56% of
+recalibration repeats, consistent with this collection's dispersed nG/Σp
+ratios (low-nG duplicate-question qrels; the regime the pilot identified as
+the "hurt corner"). Selection predominantly certified `ad_probe` (46/50).
+We claim transfer for this one collection under the pre-registered criterion;
+broader generality awaits the contracted second run (BRIGHT).
+
+## 10. Limitations
+
+All 13 development collections were exposed during development (D-007): every
+Section-3–6 claim is retrospective/diagnostic. C4 evidence is one prospective
+collection. nG requires complete judgment of a query's pool; our pair-budget
+axis is a pooled-qrels proxy. Certificates are empirically calibrated
+(bootstrap validity assumed), not finite-sample proven beyond Propositions
+1–2's premises.
 
 ## Reproducibility statement
 

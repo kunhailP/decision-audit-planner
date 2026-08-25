@@ -1,0 +1,45 @@
+{
+  "lock_sha256": "7a00b578a9de91640b6e8326600c72ee018a9982d0289b48042e13afa4a31069",
+  "target": "cqadupstack-android",
+  "n_queries": 699,
+  "cap": 349,
+  "looks": [
+    10,
+    30,
+    50,
+    70,
+    90
+  ],
+  "c_star": 0.6910829020267318,
+  "alpha": 0.1,
+  "eps_cal": 0.005,
+  "eps_sel": 0.01,
+  "repeats": 50,
+  "by_decision": {
+    "recalibration": {
+      "act_rate": 0.44,
+      "abstain_rate": 0.56,
+      "mean_T": 76.0,
+      "wrong_cert_rate": 0.0,
+      "mc_se": 0.042426406871192854,
+      "picks": {
+        "ad_probe": 50
+      }
+    },
+    "selection": {
+      "act_rate": 0.8,
+      "abstain_rate": 0.2,
+      "mean_T": 48.8,
+      "wrong_cert_rate": 0.08,
+      "mc_se": 0.042426406871192854,
+      "picks": {
+        "ad_probe": 46,
+        "glob_probe": 4
+      }
+    }
+  },
+  "primary_criterion_pass": {
+    "recalibration": true,
+    "selection": true
+  }
+}
