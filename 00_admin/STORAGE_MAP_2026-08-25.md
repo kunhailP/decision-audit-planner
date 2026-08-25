@@ -33,7 +33,7 @@
 
 ## 남은 액션
 
-1. [x] 허브 git 커밋 (`c5297ae` + P4 후 최종 커밋)
-2. [ ] Kaggle v3 업로드 (`package_kaggle_v3.sh` — P4 후 실행)
-3. [ ] GitHub `decision-audit-planner` private repo 생성·push (새 토큰 필요)
-4. [ ] Pod-A(G5 clean-room)에 Kaggle v3 사본 전달
+1. [x] 허브 git 커밋 (단독 저자 히스토리: `3cb1d57`, `5edf8c8`)
+2. [x] Kaggle v3.1 업로드 완료 (bundle 복원 시험 통과)
+3. [x] GitHub `kunhailP/decision-audit-planner` (private) 생성·push 완료 (2026-08-25)
+4. [ ] Pod-A(G5 clean-room)에 Kaggle v3.1 사본 전달
