@@ -1,6 +1,17 @@
 # 현재 상태와 다음 게이트
 
-업데이트: 2026-08-20
+업데이트: 2026-08-25 (E02 복구 + G2 개발 증거 — `EVIDENCE_RECOVERY_2026-08-25.md`)
+
+## 2026-08-25 진행 (G2 개발 트랙)
+
+- [x] P2 budget curves: k∈{5,10,20,50,100}×50회, row-level 보존 (`05_results/budget_curves/`), F1 그림
+- [x] Freeze proposal v0.3 작성 (`01_design/FREEZE_PROPOSAL_v0.3.md`) — **사용자 비준 대기**
+- [x] C3 simulation: 36 cell 전부 wrong-cert ≤ α; recal 인증서 look-보정 결함 발견·수정 (`05_results/simulation/`)
+- [x] Sequential planner + 13개 replay: 전체 wrong-cert 0.035; **in-sample 인증서 anticonservative 발견(scifact 0.36) → LOO cross-fitting으로 해결** (`05_results/planner_replay/`, ablation 보존)
+- [x] M7 지표 민감도: recall에서 비대칭 방향 역전 확인 — C3 기제 강화 (`05_results/budget_curves_recall|_ndcg/`)
+- [x] 테스트 스위트 21개 all green (`04_code/tests/run_tests.py`) — legacy 재현·leakage·재생성 포함
+- [x] 논문 초안 v0.3 (`06_paper/DRAFT_v0.3.md`), prospective 프로토콜 v0.1 (`03_data/PROSPECTIVE_PROTOCOL_v0.1.md`)
+- [ ] Freeze 비준 (사용자) → 이후 G4 prospective collection lock (권고: TREC-DL run-set)
 
 ## North-star update
 
@@ -10,7 +21,7 @@
 - [x] Decision-Specific Audit Planner의 v0.2 interface 작성
 - [x] claim–evidence matrix와 reviewer-grade quality gates 작성
 - [ ] tolerance, risk, sequential interval method를 simulation 전에 고정
-- [ ] candidate artifact 복구 또는 재생성
+- [x] candidate artifact 복구 또는 재생성 — 2026-08-25 Kaggle 백업에서 복구, provenance 검증 및 byte-identical 재현 완료
 
 candidate-level artifact 생성은 연구자가 별도 Pod에서 진행한다. 따라서 이것은 로컬 작업 전체를 멈추는 blocker가 아니라 **Pod evidence dependency**다. 반환 전에는 C1 이상의 실증 claim을 갱신하지 않되, 로컬에서는 method freeze·문헌 audit·fixture/test 구현을 병렬 진행한다.
 
@@ -29,6 +40,7 @@ candidate-level artifact 생성은 연구자가 별도 Pod에서 진행한다. �
 - [x] 새 컨퍼런스 프로젝트 폴더 분리
 - [x] 핵심 결정을 recalibration과 selection으로 축소
 - [x] “labels”와 “audited queries”의 단위 구분
+- [x] 1세대 정치학 프로젝트 종결, `_legacy/`로 분리 (D-018)
 
 ## G0 Scope freeze
 
@@ -44,7 +56,7 @@ candidate-level artifact 생성은 연구자가 별도 Pod에서 진행한다. �
 - [x] LODO에서 현재 target dataset이 classifier·truncation 학습에서 제외됨을 확인
 - [x] `ad_c`가 target의 모든 query로 계산한 scalar `c_star`를 사용함을 확인
 - [x] candidate artifact와 pair-cost 정보가 현재 작업본에 없음을 확인
-- [ ] 누락된 `runs/candidates/`의 원본 보관 위치 확인 또는 재생성 비용 산정
+- [x] 누락된 `runs/candidates/`의 원본 보관 위치 확인 — git에 커밋된 적 없음(.gitignore), Kaggle `kunhail/shift-study-artifacts`에서 13개 전체 복구 (2026-08-25)
 - [ ] 모든 기존 headline 수치를 새 용어로 다시 계산
 
 ## 확인된 제약

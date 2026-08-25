@@ -1,0 +1,132 @@
+{
+  "eps_cal": 0.005,
+  "eps_sel": 0.01,
+  "target_rate": 0.9,
+  "repeats": 50,
+  "collections": 13,
+  "pooled_curves": [
+    {
+      "k_requested": 5,
+      "cal_rate": 0.6569230769230768,
+      "sel_rate": 0.5292307692307692
+    },
+    {
+      "k_requested": 10,
+      "cal_rate": 0.7692307692307693,
+      "sel_rate": 0.5846153846153845
+    },
+    {
+      "k_requested": 20,
+      "cal_rate": 0.8553846153846153,
+      "sel_rate": 0.6723076923076923
+    },
+    {
+      "k_requested": 50,
+      "cal_rate": 0.9107692307692308,
+      "sel_rate": 0.8184615384615385
+    },
+    {
+      "k_requested": 100,
+      "cal_rate": 0.9492307692307692,
+      "sel_rate": 0.9215384615384615
+    }
+  ],
+  "budget_gap": [
+    {
+      "collection": "arguana",
+      "untouched": false,
+      "k_star_cal": 10.0,
+      "k_star_sel": 20.0,
+      "max_k_effective": 100
+    },
+    {
+      "collection": "dbpedia-entity",
+      "untouched": false,
+      "k_star_cal": 50.0,
+      "k_star_sel": 20.0,
+      "max_k_effective": 100
+    },
+    {
+      "collection": "fiqa",
+      "untouched": false,
+      "k_star_cal": 10.0,
+      "k_star_sel": NaN,
+      "max_k_effective": 100
+    },
+    {
+      "collection": "nfcorpus",
+      "untouched": false,
+      "k_star_cal": 50.0,
+      "k_star_sel": 10.0,
+      "max_k_effective": 100
+    },
+    {
+      "collection": "quora",
+      "untouched": false,
+      "k_star_cal": NaN,
+      "k_star_sel": 100.0,
+      "max_k_effective": 100
+    },
+    {
+      "collection": "scidocs",
+      "untouched": false,
+      "k_star_cal": 5.0,
+      "k_star_sel": 50.0,
+      "max_k_effective": 100
+    },
+    {
+      "collection": "scifact",
+      "untouched": false,
+      "k_star_cal": 20.0,
+      "k_star_sel": NaN,
+      "max_k_effective": 100
+    },
+    {
+      "collection": "trec-covid",
+      "untouched": false,
+      "k_star_cal": 20.0,
+      "k_star_sel": 5.0,
+      "max_k_effective": 25
+    },
+    {
+      "collection": "webis-touche2020",
+      "untouched": false,
+      "k_star_cal": 5.0,
+      "k_star_sel": 10.0,
+      "max_k_effective": 24
+    },
+    {
+      "collection": "climate-fever",
+      "untouched": true,
+      "k_star_cal": 5.0,
+      "k_star_sel": NaN,
+      "max_k_effective": 100
+    },
+    {
+      "collection": "fever",
+      "untouched": true,
+      "k_star_cal": NaN,
+      "k_star_sel": 50.0,
+      "max_k_effective": 100
+    },
+    {
+      "collection": "hotpotqa",
+      "untouched": true,
+      "k_star_cal": 50.0,
+      "k_star_sel": 100.0,
+      "max_k_effective": 100
+    },
+    {
+      "collection": "nq",
+      "untouched": true,
+      "k_star_cal": 20.0,
+      "k_star_sel": 100.0,
+      "max_k_effective": 100
+    }
+  ],
+  "headline": {
+    "n_collections_cal_ok_at_k10": 5,
+    "n_collections_sel_ok_at_k10": 3,
+    "n_collections_sel_ok_at_k100": 10
+  }
+}

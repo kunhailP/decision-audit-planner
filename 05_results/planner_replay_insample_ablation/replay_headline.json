@@ -1,0 +1,18 @@
+{
+  "alpha": 0.1,
+  "eps_cal": 0.005,
+  "eps_sel": 0.01,
+  "overall_wrong_cert_rate": 0.057692307692307696,
+  "by_decision": {
+    "recalibration": {
+      "act_rate": 0.5076923076923077,
+      "mean_T": 57.23076923076923,
+      "wrong_cert_rate": 0.016923076923076923
+    },
+    "selection": {
+      "act_rate": 0.5707692307692308,
+      "mean_T": 54.4,
+      "wrong_cert_rate": 0.09846153846153846
+    }
+  }
+}

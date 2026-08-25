@@ -4,16 +4,21 @@
 
 기존 코드를 그대로 복사하기 전에 새 설계의 추정량과 대응하는지 확인한다.
 
-## 예정된 최소 파이프라인
+## 구현된 파이프라인 (2026-08-25)
 
 ```text
-00_inventory.py          기존 artifact와 필드 점검
-05_recover_candidates.py 누락된 candidate artifact 검증 또는 재생성
-10_reproduce_k10.py      기존 k=10 결과의 용어 수정 재현
-20_budget_curves.py      k={5,10,20,50,100} 반복표집
-30_summarize.py          success rate, regret, B* 계산
-40_figures.py            논문과 발표용 그림 3개 생성
+00_inventory.py          기존 artifact와 필드 점검 (--source 필수: /root/shift-study)
+20_budget_curves.py      C1: k={5,10,20,50,100} 반복표집, --utility {set_f1,recall,ndcg}
+30_summarize.py          C1 요약: success rate, budget gap, F1 그림 (row-level에서 재생성)
+40_planner_replay.py     C2: sequential planner + 13개 development replay, F2
+50_simulation.py         C2 coverage + C3 기제 simulation, F3
+60_prospective_build.py  P4: target candidate 빌드 (원본 build_candidates.py 로직, CPU)
+70_prospective_run.py    P4: prospective primary run (단 한 번, lock 준수)
+tests/run_tests.py       unit / leakage / regeneration / statistical (21 tests)
 ```
+
+candidate 복구(05)와 legacy 재현(10)은 스크립트 없이 완료됨:
+`00_admin/EVIDENCE_RECOVERY_2026-08-25.md` (Kaggle 백업, byte-identical `make confirm`).
 
 ## 구현 불변조건
 
@@ -30,6 +35,8 @@
 
 - active learning
 - PPI
-- sequential stopping
 - 새 retriever 학습
 - 응용 분야별 annotation pipeline
+
+(sequential stopping은 2026-08-25 `40_planner_replay.py`로 구현 완료 —
+frozen v0.3 스펙, LOO cross-fitting.)

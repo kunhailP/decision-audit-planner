@@ -1,0 +1,14 @@
+collection,untouched,k_star_cal,k_star_sel,max_k_effective
+arguana,False,10.0,20.0,100
+dbpedia-entity,False,50.0,20.0,100
+fiqa,False,10.0,,100
+nfcorpus,False,50.0,10.0,100
+quora,False,,100.0,100
+scidocs,False,5.0,50.0,100
+scifact,False,20.0,,100
+trec-covid,False,20.0,5.0,25
+webis-touche2020,False,5.0,10.0,24
+climate-fever,True,5.0,,100
+fever,True,,50.0,100
+hotpotqa,True,50.0,100.0,100
+nq,True,20.0,100.0,100

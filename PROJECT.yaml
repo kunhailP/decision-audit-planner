@@ -47,7 +47,8 @@ local_track:
 
 evidence_dependency:
   id: missing_candidate_artifacts
-  consequence: budget_curves_and_planner_validation_cannot_be_reproduced
+  status: resolved_2026-08-25_kaggle_backup_restore
+  record: 00_admin/EVIDENCE_RECOVERY_2026-08-25.md
 
 resource_constraints:
   local_free_space_gib_observed: 27
@@ -57,5 +58,6 @@ resource_constraints:
   execution_owner: external_pod
 
 next_gate:
-  id: G1
-  exit_condition: pod_returned_candidate_artifacts_have_provenance_checksums_and_a_validated_schema
+  id: G2
+  note: G1_exit_met_2026-08-25_via_kaggle_backup_with_checksums_and_byte_identical_reproduction
+  exit_condition: planner_implemented_with_coverage_and_stopping_validated_on_simulation_and_development_data

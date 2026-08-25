@@ -102,3 +102,28 @@
 - Pod는 raw data, embedding, candidate, 반복실험, 실행환경 기록을 담당한다.
 - Pod에서 연구질문이나 성공기준을 수정하지 않는다.
 - 반환 artifact는 manifest, checksum, row-level output을 갖추고 로컬 검증 후에만 증거로 승격한다.
+
+## D-018 — 1세대 정치학 프로젝트를 종결하고 legacy로 분리한다
+
+- 날짜: 2026-08-24
+- 결정: 로비 텍스트 측정 프로젝트("AI로 측정한 로비 입장은 의회를 넘어 일반화되는가")를 **종결**한다. `research/`, `DXW_2026_paper/`, `무제 폴더/`를 허브 루트의 `../_legacy/`로 이동한다. 이 프로젝트가 이 허브의 유일한 주 프로젝트다.
+- 이유: D-008이 정치학·로비·법학 응용을 논문에서 제외했고 D-013이 설계 기준을 상위 학회로 올린 뒤, 1세대는 소유자도 마감도 없는 상태로 루트에 남아 있었다. D-016이 "유일한 활성 flagship"을 선언했으나 폴더 구조가 그것을 반영하지 않아, 선언과 실제가 4일간 어긋나 있었다. 두 트랙을 동시에 유지할 근거가 없다.
+- 포기하는 것:
+  - 미결 4건 — G0 판정 기록, 제2 인간 코더 B 확보, `lda_pilot.py` 실행, 모델 스위트 최종 구성
+  - APSA *PS: Political Science & Politics* 특집호 투고 (마감 2026-11-01). 모집 범위가 주제와 일치했으나 이를 추구할 트랙을 유지하지 않는다.
+  - EXP-003~006 (미개시), EXP-009 (사전등록만)
+- 보존하는 것 — 결과가 아니라 규율의 증거이며, 재사용 시 출처 명시와 원문 재검증을 요구한다:
+  - 인용 오류 10건과 유령 문헌 2건 판정 (`_legacy/DXW_2026_paper/02_선행연구/인용검증_2026-08-17.md`)
+  - 검증 통과 항목만 담은 `references_verified.bib`
+  - 자기 논증을 무너뜨리는 발견을 기록한 사례 (D-019, 지침 개정 경로 폐기)
+  - `research/00_admin/SOP.md` — 현재 `QUALITY_GATES.md`와 결정로그 형식의 원형
+- 경로 주의: D-001이 언급하는 `DXW_2026_paper`는 이제 `../_legacy/DXW_2026_paper`다. 과거 결정문은 기록이므로 원문을 수정하지 않는다.
+- 상태: 확정
+- 재검토 조건: flagship이 G4를 통과해 종료되고 `10_research_program/README.md`의 P4(cross-domain measurement)를 실제로 여는 시점에만 재검토한다.
+
+## D-019 — Freeze v0.3 비준 및 prospective lock (2026-08-25)
+
+사용자 위임("가장 좋은 연구를 만들어라")에 따라 FREEZE_PROPOSAL_v0.3을 비준하고,
+prospective target을 규칙 기반으로 BEIR cqadupstack/android로 고정했다
+(`03_data/PROSPECTIVE_LOCK_2026-08-25.md`, 데이터 다운로드 전에 커밋).
+Primary run은 단 한 번이며 결과와 무관하게 보고한다.
