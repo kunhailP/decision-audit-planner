@@ -67,3 +67,22 @@
     "Selective Classification for Deep Neural Networks." NeurIPS 2017.
     — 차별점: 고정 모델의 per-prediction 위험/기권 인증; 라벨 취득 예산
     계획·결정 통합·pooled 비용 없음.
+
+## Batch 3 — 2026-09-10 추가 (웹 검증: arXiv/venue 페이지 확인)
+
+11. Angelopoulos, Duchi, Zrnic (2023). "PPI++: Efficient Prediction-Powered Inference." arXiv:2311.01453.
+12. Zrnic, Candès (2024). "Active Statistical Inference." PNAS. arXiv:2403.03208.
+13. Li et al. (2025). "Robust Sampling for Active Statistical Inference." NeurIPS 2025. arXiv:2511.08991.
+14. Sfyraki, Wang (2026). "Revisiting Active Sequential Prediction-Powered Mean Estimation." ICLR 2026. arXiv:2604.18569.
+15. Kilian et al. (2025). "Anytime-valid, Bayes-assisted, Prediction-Powered Inference." NeurIPS 2025.
+16. Chatzi, Straitouri, Thejaswi, Gomez-Rodriguez (2024). "Prediction-Powered Ranking of Large Language Models." NeurIPS 2024. arXiv:2402.17826.
+17. Gligorić, Zrnic, Lee, Candès, Jurafsky (2024). "Can Unconfident LLM Annotations Be Used for Confident Conclusions?" arXiv:2408.15204.
+18. Durmazkeser, Okanovic, Kirsch, Hoefler, Gürel (2026). "Large Language Model Selection with Limited Annotations." arXiv:2605.24981.
+19. Balog et al. (2025). "Rankers, Judges, and Assistants: Towards Understanding the Interplay of LLMs in Information Retrieval Evaluation." arXiv:2503.19092.
+20. Upadhyay, Pradeep, Thakur, Craswell, Lin (2024). "UMBRELA: UMbrela is the (Open-Source Reproduction of the) Bing RELevance Assessor." arXiv:2406.06519.
+21. Sawade, Landwehr, Scheffer (2012). "Active Comparison of Prediction Models." NIPS 2012.
+22. Kossen, Farquhar, Gal, Rainforth (2021). "Active Testing: Sample-Efficient Model Evaluation." ICML 2021 (PMLR 139).
+23. Jourdan, Degenne (2022). "Choosing Answers in ε-Best-Answer Identification for Linear Bandits." ICML 2022 (PMLR 162). arXiv:2206.04456.
+24. Emmenegger, Stahler, Podimata (2026). "Prediction-Powered Inference Across Many Tasks for AI Evaluation & Social Science Research." arXiv:2605.29249.
+25. Zecchin, Simeone (2024). "Adaptive Learn-then-Test: Statistically Valid and Efficient Hyperparameter Selection." arXiv:2409.15844 (venue 확인 필요 — 초안에서 언급 시 arXiv로 인용).
+26. Qwen Team (2025). "Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models." 기술 보고서/블로그. Mistral AI (2024). Mistral-7B-Instruct-v0.3 (모델 카드).
