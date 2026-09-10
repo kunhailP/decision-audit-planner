@@ -26,6 +26,9 @@ spec = importlib.util.spec_from_file_location("bc", os.path.join(HERE, "20_budge
 bc = importlib.util.module_from_spec(spec); spec.loader.exec_module(bc)
 spec = importlib.util.spec_from_file_location("cert", os.path.join(HERE, "lib", "certificates.py"))
 cert = importlib.util.module_from_spec(spec); spec.loader.exec_module(cert)
+spec = importlib.util.spec_from_file_location("nt", os.path.join(HERE, "lib", "neutrality.py"))
+nt = importlib.util.module_from_spec(spec); spec.loader.exec_module(nt)
+PILOT_MIN, GAIN_MIN = 30, 1.1        # judge-adoption rule, fixed at development time (LOCK v0.4 draft)
 
 NAMES = ["nfcorpus", "scifact", "arguana", "cqadupstack-android"]
 ALPHA, EPS_CAL, EPS_SEL = 0.10, 0.005, 0.01
@@ -257,7 +260,8 @@ def main():
             # independent bootstrap streams per method so adding a method never perturbs another's numbers
             rng_m = {m: np.random.default_rng([5_000_000 + 1000 * rep + salt, zlib.crc32(m.encode())])
                      for m in ["recal", "loo_boot", "loo_sim"]}
-            state = {m: None for m in ["recal_bp", "recal_ep", "recal_bpx", "recal_bpu", "recal_bpxu", "loo_boot", "loo_sim", "split_t", "split_ppi"]}
+            state = {m: None for m in ["recal_bp", "recal_ep", "recal_bpx", "recal_bpu", "recal_bpxu", "loo_boot", "loo_sim", "split_t", "split_ppi", "split_auto"]}
+            auto_used = None
             for T in looks:
                 probe = [H[i] for i in perm[:T]]
                 c_hat, tau_i, ratios = fit_params(probe); th_i = fit_theta(probe)
@@ -303,7 +307,7 @@ def main():
                         if ucb.max() <= EPS_SEL:
                             state["loo_sim"] = ("act", T, dict(pick=cand, c_hat=c_hat, tau_i=tau_i, th_i=th_i))
                 # ---- split designs ----
-                if state["split_t"] is None or state["split_ppi"] is None:
+                if state["split_t"] is None or state["split_ppi"] is None or state["split_auto"] is None:
                     ntr = T // 2
                     train = [H[i] for i in perm[:ntr]]; val = [H[i] for i in perm[ntr:T]]
                     c_tr, tau_tr, _ = fit_params(train); th_tr = fit_theta(train)
@@ -313,12 +317,28 @@ def main():
                         ucb = cert.ucb_t(U, cand, a_sel_sim)
                         if ucb.max() <= EPS_SEL:
                             state["split_t"] = ("act", T, dict(pick=cand, c_hat=c_tr, tau_i=tau_tr, th_i=th_tr))
-                    if state["split_ppi"] is None:
+                    if state["split_ppi"] is None or state["split_auto"] is None:
                         Uh_all = menu_utils(HJ, c_tr, tau_tr, th_tr)
                         Uh_val = Uh_all[perm[ntr:T]]
-                        ucb = cert.ucb_ppi(U, Uh_val, Uh_all, cand, a_sel_sim)
-                        if ucb.max() <= EPS_SEL:
+                        ucb_p = cert.ucb_ppi(U, Uh_val, Uh_all, cand, a_sel_sim)
+                        if state["split_ppi"] is None and ucb_p.max() <= EPS_SEL:
                             state["split_ppi"] = ("act", T, dict(pick=cand, c_hat=c_tr, tau_i=tau_tr, th_i=th_tr))
+                        if state["split_auto"] is None:
+                            # judge-adoption rule evaluated on the TRAIN half only (pilot): candidate-vs-runner-up pair
+                            Ut = menu_utils(train, c_tr, tau_tr, th_tr); Uh_tr = Uh_all[perm[:ntr]]
+                            ct = cert.pick_candidate(Ut) if ntr >= 3 else 0
+                            others = [j for j in range(Ut.shape[1]) if j != ct]
+                            ru = max(others, key=lambda j: Ut[:, j].mean())
+                            use = False
+                            if ntr >= PILOT_MIN:
+                                dtr, dhtr = Ut[:, ru] - Ut[:, ct], Uh_tr[:, ru] - Uh_tr[:, ct]
+                                _, lcb = nt.rho_lcb_boot(dtr, dhtr, ALPHA, rng_m["recal"], boot=400)
+                                use = (1.0 / (1 - lcb ** 2) if lcb > 0 else 1.0) > GAIN_MIN
+                            ucb_a = ucb_p if use else cert.ucb_t(U, cand, a_sel_sim)
+                            if auto_used is None:
+                                auto_used = use
+                            if ucb_a.max() <= EPS_SEL:
+                                state["split_auto"] = ("act", T, dict(pick=cand, c_hat=c_tr, tau_i=tau_tr, th_i=th_tr, used_judge=use))
                 if all(v is not None for v in state.values()):
                     break
             for key in state:
@@ -336,7 +356,8 @@ def main():
                     eps = EPS_SEL
                 rows.append(dict(stack=a.stack, collection=held, repeat_id=rep, method=key, action=action,
                                  final_T=T, selected_policy=picked, loss=loss,
-                                 wrong_cert=(action == "act" and loss is not None and loss > eps)))
+                                 wrong_cert=(action == "act" and loss is not None and loss > eps),
+                                 used_judge=pl.get("used_judge", None)))
         sub = [r for r in rows if r["collection"] == held]
         for key in state:
             d = [r for r in sub if r["method"] == key]
