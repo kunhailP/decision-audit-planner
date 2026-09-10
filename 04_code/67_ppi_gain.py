@@ -28,12 +28,15 @@ def main():
     ap.add_argument("--names", nargs="+", required=True); ap.add_argument("--judge", default="rr")
     ap.add_argument("--budgets", nargs="+", type=int, default=[10, 20, 30])
     ap.add_argument("--draws", type=int, default=500)
+    ap.add_argument("--train_dir", default=None); ap.add_argument("--train_names", nargs="+", default=["nfcorpus", "scifact", "arguana", "cqadupstack-android"])
     a = ap.parse_args()
     pv.NAMES = a.names; pv.JUDGE = a.judge
     data = pv.load_with_judge(os.path.join(a.pools, a.stack, "runs", "candidates"))
+    if a.train_dir:
+        pv.JUDGE = "rr"; data.update(pv.load_train_only(a.train_dir, a.train_names)); pv.JUDGE = a.judge
     rng_global = np.random.default_rng(0); rng = np.random.default_rng(1)
     rows = []
-    for held in data:
+    for held in [d for d in data if d not in pv.TRAIN_ONLY]:
         P, structs, reg = pv.fit_lodo(data, held, rng_global)
         H = structs[held]; c_star = pv.finalize(H, reg)
         HJ = bc.build_structs({held: data[held]["judge"]}, held, P[held]); pv.finalize(HJ, reg)
@@ -53,9 +56,8 @@ def main():
                         idx = rng.choice(N, T, replace=False)
                         dS, dhS = d[idx], dh[idx]
                         se_h.append(dS.std(ddof=1) / math.sqrt(T))
-                        v = dhS.var(ddof=1)
-                        lam = float(np.clip(np.cov(dS, dhS)[0, 1] / v, 0, 1)) if v > 0 else 0.0
-                        resid = dS - lam * dhS
+                        lam_vec = cert.crossfit_lambda(dS, dhS); lam = float(lam_vec.mean())
+                        resid = dS - lam_vec * dhS
                         se_p.append(math.sqrt(lam ** 2 * dh.var(ddof=1) / N + resid.var(ddof=1) / T))
                         lam_s.append(lam)
                     rows.append(dict(collection=held, judge=a.judge, pair=f"{MENU[ia]}_vs_{MENU[ib]}", T=T,

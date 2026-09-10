@@ -122,6 +122,18 @@ def median_ci_exact(x, alpha):
     return float(x[k - 1]), float(x[n - k])
 
 
+def crossfit_lambda(d, dh):
+    """Cross-fitted PPI++ tuning (deterministic halves): lambda for each half
+    is estimated on the other half, removing the in-sample optimism of a
+    lambda tuned and applied on the same audited queries."""
+    n = len(d); a, b = np.arange(n // 2), np.arange(n // 2, n)
+    lam = np.zeros(n)
+    for fit, apply in [(a, b), (b, a)]:
+        v = dh[fit].var(ddof=1) if len(fit) > 1 else 0.0
+        lam[apply] = float(np.clip(np.cov(d[fit], dh[fit])[0, 1] / v, 0, 1)) if v > 0 and len(fit) > 1 else 0.0
+    return lam
+
+
 # ----------------------------------------------------------------------------
 # helpers
 # ----------------------------------------------------------------------------
@@ -180,7 +192,7 @@ def ucb_t(U, cand, alpha_prime):
     return ucb
 
 
-def ucb_ppi(U, Uhat_lab, Uhat_all, cand, alpha_prime):
+def ucb_ppi(U, Uhat_lab, Uhat_all, cand, alpha_prime, crossfit=True):
     """PPI++ one-sided UCB for mu_j - mu_cand.
 
     U        (n, M) human utilities on audited queries
@@ -197,9 +209,13 @@ def ucb_ppi(U, Uhat_lab, Uhat_all, cand, alpha_prime):
     for j in range(M):
         if j == cand:
             continue
-        v = Dh_lab[:, j].var(ddof=1)
-        lam = float(np.clip(np.cov(D[:, j], Dh_lab[:, j])[0, 1] / v, 0.0, 1.0)) if v > 0 else 0.0
-        resid = D[:, j] - lam * Dh_lab[:, j]
+        if crossfit and n >= 6:
+            lam_vec = crossfit_lambda(D[:, j], Dh_lab[:, j])
+        else:
+            v = Dh_lab[:, j].var(ddof=1)
+            lam_vec = np.full(n, float(np.clip(np.cov(D[:, j], Dh_lab[:, j])[0, 1] / v, 0.0, 1.0)) if v > 0 else 0.0)
+        lam = float(lam_vec.mean())
+        resid = D[:, j] - lam_vec * Dh_lab[:, j]
         est = lam * Dh_all[:, j].mean() + resid.mean()
         se = math.sqrt(lam ** 2 * Dh_all[:, j].var(ddof=1) / N + resid.var(ddof=1) / n)
         ucb[j] = est + q * se

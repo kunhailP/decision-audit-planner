@@ -69,6 +69,18 @@ def load_with_judge(cand_dir):
     return data
 
 
+TRAIN_ONLY = set()
+
+
+def load_train_only(train_dir, train_names):
+    """Extra collections used only to fit the classifier / tau / trunc regressor."""
+    global NAMES, TRAIN_ONLY
+    saved = NAMES; NAMES = train_names
+    extra = load_with_judge(train_dir)
+    NAMES = saved; TRAIN_ONLY = set(extra)
+    return extra
+
+
 def fit_lodo(data, held, rng_global):
     from sklearn.linear_model import LogisticRegression
     from sklearn.preprocessing import StandardScaler
@@ -159,6 +171,8 @@ def main():
     ap.add_argument("--out", default=None)
     ap.add_argument("--names", nargs="+", default=None, help="collections (default: BEIR four)")
     ap.add_argument("--judge", default="rr", choices=["rr", "llm"])
+    ap.add_argument("--train_dir", default=None, help="candidates dir of training-only collections")
+    ap.add_argument("--train_names", nargs="+", default=["nfcorpus", "scifact", "arguana", "cqadupstack-android"])
     a = ap.parse_args()
     global NAMES, JUDGE
     JUDGE = a.judge
@@ -167,13 +181,16 @@ def main():
     out = a.out or os.path.join(HUB, "05_results", "planner_v2", a.stack + ("" if a.judge == "rr" else "_" + a.judge)); os.makedirs(out, exist_ok=True)
     cand_dir = os.path.join(a.pools, a.stack, "runs", "candidates")
     data = load_with_judge(cand_dir)
+    if a.train_dir:
+        saved_judge = JUDGE; JUDGE = "rr"          # training pools need no LLM side file
+        data.update(load_train_only(a.train_dir, a.train_names)); JUDGE = saved_judge
     rng_global = np.random.default_rng(0)
     rows, diags = [], {}
     a_look = ALPHA / len(LOOKS)
     a_sel_legacy = cert.bonferroni_alpha(ALPHA, len(LOOKS), len(MENU), simultaneous=False)
     a_sel_sim = cert.bonferroni_alpha(ALPHA, len(LOOKS), len(MENU), simultaneous=True)
 
-    for held in data:
+    for held in [d for d in data if d not in TRAIN_ONLY]:
         P, structs, reg = fit_lodo(data, held, rng_global)
         H = structs[held]; c_star = finalize(H, reg)
         # judge structs: same P ordering, judge relevance and judge nG
@@ -192,13 +209,16 @@ def main():
         for rep in range(a.repeats):
             rng = np.random.default_rng(5_000_000 + 1000 * rep + salt)
             perm = rng.permutation(n)
+            # independent bootstrap streams per method so adding a method never perturbs another's numbers
+            rng_m = {m: np.random.default_rng([5_000_000 + 1000 * rep + salt, zlib.crc32(m.encode())])
+                     for m in ["recal", "loo_boot", "loo_sim"]}
             state = {m: None for m in ["recal_bp", "recal_ep", "recal_bpx", "recal_bpu", "recal_bpxu", "loo_boot", "loo_sim", "split_t", "split_ppi"]}
             for T in looks:
                 probe = [H[i] for i in perm[:T]]
                 c_hat, tau_i, ratios = fit_params(probe)
                 # ---- recalibration (full probe) ----
                 if any(state[k] is None for k in ["recal_bp", "recal_ep", "recal_bpx", "recal_bpu", "recal_bpxu"]):
-                    bs = rng.integers(0, len(ratios), (BOOT, len(ratios)))
+                    bs = rng_m["recal"].integers(0, len(ratios), (BOOT, len(ratios)))
                     bmed = np.median(ratios[bs], axis=1)
                     c_lo, c_hi = np.quantile(bmed, [a_look / 2, 1 - a_look / 2])      # v0.3 bootstrap CI
                     x_lo, x_hi = cert.median_ci_exact(ratios, a_look)                 # exact order-stat CI
@@ -211,7 +231,7 @@ def main():
                                 state[key] = ("act", T, dict(c_hat=c_hat, spread=spread, npts=npts))
                     for key, lo, hi in [("recal_bpu", c_lo, c_hi), ("recal_bpxu", x_lo, x_hi)]:
                         if state[key] is None and np.isfinite(lo) and np.isfinite(hi):
-                            spread, npts = cert.recal_spread_ucb(probe, c_hat, lo, hi, a_look, rng)
+                            spread, npts = cert.recal_spread_ucb(probe, c_hat, lo, hi, a_look, rng_m["recal"])
                             if spread <= EPS_CAL:
                                 state[key] = ("act", T, dict(c_hat=c_hat, spread=spread, npts=npts))
                 # ---- legacy LOO bootstrap ----
@@ -227,11 +247,11 @@ def main():
                         U[i, 1] = s["f_trunc"]
                     cand = cert.pick_candidate(U)
                     if state["loo_boot"] is None:
-                        ucb = cert.ucb_bootstrap(U, cand, a_sel_legacy, rng, BOOT)
+                        ucb = cert.ucb_bootstrap(U, cand, a_sel_legacy, rng_m["loo_boot"], BOOT)
                         if ucb.max() <= EPS_SEL:
                             state["loo_boot"] = ("act", T, dict(pick=cand, c_hat=c_hat, tau_i=tau_i))
                     if state["loo_sim"] is None:
-                        ucb = cert.ucb_bootstrap(U, cand, a_sel_sim, rng, BOOT)
+                        ucb = cert.ucb_bootstrap(U, cand, a_sel_sim, rng_m["loo_sim"], BOOT)
                         if ucb.max() <= EPS_SEL:
                             state["loo_sim"] = ("act", T, dict(pick=cand, c_hat=c_hat, tau_i=tau_i))
                 # ---- split designs ----
