@@ -399,3 +399,46 @@ LLM 판정자 pair 정확도 0.76 (reranker 0.72). ρ는 0.61–0.66 (reranker 0
 **발견한 구현 결함(재현 규율):** left padding 배치에서 position_ids를 넘기지 않으면 padding이 큰 행의 RoPE
 위치가 밀려 출력이 붕괴한다. trec-covid LLM 판정이 49/50 query에서 전부 0이 된 원인. 수정 후 재판정 중이며,
 같은 문제가 Qwen3-Reranker 점수(batch 128)에도 영향을 주었는지 검사한다.
+
+### 10.5 최종 재실행 — 세 완전 판정 collection 동일 조건 (학습: BEIR legacy 4 pool), 판정자 2종
+
+**reranker 점수는 padding 문제의 영향이 없음을 확인**(batch 128 vs 1, 점수 차 평균 0.001, 정확도 동일).
+LLM 판정자는 position_ids 수정 후 trec-covid 정확도 0.43 → 0.72.
+
+**판정자 진단 (pair 정확도 / ρ 범위)**
+
+| collection | N | reranker | LLM(8B) |
+|---|---|---|---|
+| trec-covid | 50 | 0.67 / 0.74–0.82 | 0.76 / 0.73–0.84 |
+| webis-touche | 49 | 0.57 / 0.24–0.48 | 0.79 / 0.69–0.81 |
+| dbpedia-entity | 399 | 0.72 / 0.44–0.57 | 0.76 / 0.53–0.63 |
+
+**PPI 이득(cross-fit λ, T=10 / T=90)**: LLM 판정자에서 trec-covid 1.13–1.51, touche 1.12–1.46, dbpedia 1.25–1.42
+(T=90에서도 1.25–1.42 유지). reranker: touche 0.90–0.97(이득 없음), dbpedia 1.06–1.27.
+
+**순차 인증서 (dbpedia, look 10–90, 50회, α=0.1)**
+
+| method | ACT | wrong |
+|---|---|---|
+| loo_boot (v0.3) | 0.90 | **0.16** |
+| loo_sim | 0.74 | 0.10 |
+| split_t | 0.14 | 0.00 |
+| split_ppi (reranker) | 0.18 | 0.00 |
+| split_ppi (LLM) | 0.20 | 0.00 |
+| recal_ep (v0.3) | 0.14 | 0.10 |
+| recal_bpx | 0.02 | 0.00 |
+
+- 이 구성에서 유효 인증서의 ACT 증가는 0.14 → 0.20 (§10.4의 다른 학습 구성에서는 0.22 → 0.42).
+  고정예산 ESS 이득 1.3–1.4배가 ACT율로는 구성에 따라 1.4–2배로 나타난다. 두 구성 모두 잘못된 인증 0.
+- F4 최종(45점, cross-fit λ): T=10 corr(이득, ρ)=0.74, corr(이득, 정확도)=−0.05; T=30 0.69 / 0.00.
+
+### 10.6 2단계 종합
+
+1. **메커니즘 확정**: PPI 감사 절감은 결정 관련 일치도 ρ가 결정하고 전체 정확도는 무관(45점, 판정자 2종, pool 3종).
+2. **실용 결과**: N이 큰 완전 판정 pool에서 LLM 판정자 + 유효 인증서로 ACT율 1.4–2배, 오류 0.
+3. **v0.3 결함 재확인**: dbpedia에서 선택 오류율 0.16, 보정 끝점검사 오류율 0.10.
+4. **중립성 진단**: bootstrap ρ 하한은 pilot ≥ 20에서 대체로 유효(coverage 0.83–0.99), reranker 사용 불가를 맞히고
+   LLM 사용을 49–82% 권고. 유한모집단·skew 보정은 후속.
+5. **남은 일**: (a) 정리 A·B·C의 증명과 anytime-valid 버전, (b) 판정자 편향이 특정 정책과 상관될 때
+   (같은 모델군 reranker 정책 + LLM 판정자)의 실측 — 현재 메뉴에는 LLM 기반 정책이 없어 미검증,
+   (c) query 수 ≥ 400인 완전 판정 collection 추가(TREC DL 2021–23 v2, LLMJudge), (d) prospective lock.
