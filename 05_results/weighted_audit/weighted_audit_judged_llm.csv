@@ -1,0 +1,17 @@
+collection,judge,budget_full_eq,eps,method,act,wrong
+dbpedia-entity,llm,30,0.01,human_full,0.03,0.0
+dbpedia-entity,llm,30,0.01,human_weighted,0.03,0.0
+dbpedia-entity,llm,30,0.01,judge_ppi,0.01,0.0
+dbpedia-entity,llm,30,0.01,weighted_cv,0.04,0.0
+dbpedia-entity,llm,30,0.02,human_full,0.06,0.0
+dbpedia-entity,llm,30,0.02,human_weighted,0.04,0.0
+dbpedia-entity,llm,30,0.02,judge_ppi,0.06,0.0
+dbpedia-entity,llm,30,0.02,weighted_cv,0.11,0.0
+dbpedia-entity,llm,60,0.01,human_full,0.17,0.0
+dbpedia-entity,llm,60,0.01,human_weighted,0.25,0.0
+dbpedia-entity,llm,60,0.01,judge_ppi,0.23,0.0
+dbpedia-entity,llm,60,0.01,weighted_cv,0.34,0.0
+dbpedia-entity,llm,60,0.02,human_full,0.26,0.0
+dbpedia-entity,llm,60,0.02,human_weighted,0.46,0.0
+dbpedia-entity,llm,60,0.02,judge_ppi,0.36,0.0
+dbpedia-entity,llm,60,0.02,weighted_cv,0.53,0.0
