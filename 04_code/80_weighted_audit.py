@@ -95,7 +95,8 @@ def main():
                         if up.max() <= eps:
                             cnt["judge_ppi"][0] += 1; cnt["judge_ppi"][1] += regret > eps
                     # ---- weighted arms: b docs per query sampled ∝ |w| (Poisson), across as many queries as the budget allows ----
-                    b = a.docs_per_query; n_w = int(B // b); q_w = rest[:min(n_w, len(rest))]
+                    # spend the whole budget: if b docs/query would run out of queries, raise b so that B is used
+                    b = max(a.docs_per_query, int(math.ceil(B / len(rest)))); n_w = int(B // b); q_w = rest[:min(n_w, len(rest))]
                     if len(q_w) >= 5:
                         ok_ht = ok_cv = True
                         for j in others:
@@ -104,7 +105,13 @@ def main():
                                 r, rj, ks = arr[k]; w = weights(ks, j, cand, len(r)); aw = np.abs(w)
                                 if aw.sum() == 0:
                                     Dht.append(0.0); Dcv.append(float((w * rj).sum())); continue
-                                pi = np.minimum(1.0, b * aw / aw.sum()); samp = rng.random(len(r)) < pi
+                                pi = np.minimum(1.0, b * aw / aw.sum())
+                                # redistribute mass capped at 1 so that E[#labels] stays ~b (two passes suffice in practice)
+                                for _ in range(2):
+                                    free = pi < 1
+                                    if free.any() and pi.sum() < min(b, len(r)):
+                                        pi[free] = np.minimum(1.0, pi[free] * (min(b, len(r)) - pi[~free].sum()) / max(pi[free].sum(), 1e-9))
+                                samp = rng.random(len(r)) < pi
                                 Dht.append(float((w[samp] * r[samp] / pi[samp]).sum()))
                                 Dcv.append(float((w * rj).sum() + (w[samp] * (r[samp] - rj[samp]) / pi[samp]).sum()))
                             for name, D in [("human_weighted", np.array(Dht)), ("weighted_cv", np.array(Dcv))]:
@@ -121,7 +128,7 @@ def main():
                 print(f"{held} B={Bq}q eps={eps}: " + " ".join(f"{m}={v[0]/a.draws:.2f}/{v[1]/a.draws:.3f}" for m, v in cnt.items()), flush=True)
     import pandas as pd
     out = os.path.join(HUB, "05_results", "weighted_audit"); os.makedirs(out, exist_ok=True)
-    pd.DataFrame(rows).to_csv(os.path.join(out, f"weighted_audit_{a.stack}_{a.judge}.csv"), index=False)
+    pd.DataFrame(rows).to_csv(os.path.join(out, f"weighted_audit_{a.stack}_{a.judge}_b{a.docs_per_query}.csv"), index=False)
 
 
 if __name__ == "__main__":
