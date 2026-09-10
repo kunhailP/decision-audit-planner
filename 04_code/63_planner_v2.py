@@ -46,15 +46,16 @@ def load_with_judge(cand_dir):
         if not os.path.exists(fp):
             continue
         side = {}
-        if JUDGE == "llm":
-            for r in csv.DictReader(open(os.path.join(cand_dir, f"{name}_llm.csv"))):
-                side[(r["qid"], r["docid"])] = float(r["llm_p_rel"])
+        if JUDGE not in ("rr", "inv"):
+            for r in csv.DictReader(open(os.path.join(cand_dir, f"{name}_{JUDGE}.csv"))):
+                side[(r["qid"], r["docid"])] = float(r[f"{JUDGE}_p_rel"])
         qids, X, rel, rr = [], [], [], []
         with open(fp) as f:
             for r in csv.DictReader(f):
                 qids.append(r["qid"]); X.append([float(r[k]) for k in bc.FEATS])
                 rel.append(int(float(r["relevant"])))
-                rr.append(side[(r["qid"], r["docid"])] if JUDGE == "llm" else float(r["rr_yes"]))
+                rr.append(side[(r["qid"], r["docid"])] if JUDGE not in ("rr", "inv")
+                          else (1.0 - float(r["rr_yes"]) if JUDGE == "inv" else float(r["rr_yes"])))
         X = np.asarray(X, np.float32); rel = np.asarray(rel, np.int8); rr = np.asarray(rr, np.float32)
         qids = np.asarray(qids)
         nG = {r["qid"]: int(r["nG"]) for r in csv.DictReader(open(os.path.join(cand_dir, f"{name}_meta.csv")))}
@@ -208,13 +209,16 @@ def main():
     ap.add_argument("--repeats", type=int, default=50)
     ap.add_argument("--out", default=None)
     ap.add_argument("--names", nargs="+", default=None, help="collections (default: BEIR four)")
-    ap.add_argument("--judge", default="rr", choices=["rr", "llm"])
+    ap.add_argument("--judge", default="rr", help="rr | inv (1-rr, adversarial control) | llm | mpnet | any <name>_<judge>.csv")
+    ap.add_argument("--looks", nargs="+", type=int, default=None)
     ap.add_argument("--menu4", action="store_true", help="add rr_thresh (Qwen3-Reranker threshold policy) to the menu")
     ap.add_argument("--train_dir", default=None, help="candidates dir of training-only collections")
     ap.add_argument("--train_names", nargs="+", default=["nfcorpus", "scifact", "arguana", "cqadupstack-android"])
     a = ap.parse_args()
-    global NAMES, JUDGE, MENU
+    global NAMES, JUDGE, MENU, LOOKS
     JUDGE = a.judge
+    if a.looks:
+        LOOKS = a.looks
     if a.menu4:
         MENU = MENU4
     if a.names:
