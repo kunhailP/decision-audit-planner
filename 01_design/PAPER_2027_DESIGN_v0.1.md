@@ -158,3 +158,26 @@ look별 재표집, 70_prospective_run.py의 구간 보고. 판정자를 도입�
 - `63_planner_v2.py`: loo_boot(v0.3) / split_t / split_ppi 인증서 비교 + judge 진단
   (전체 정확도, ρ, 불일치 구간 안팎 오류율).
 - `64_trecdl_pool.py`: TREC DL 2019/2020 완전 판정 pool (go/no-go #2 testbed).
+
+### 9.4 Go/no-go #1 결과 — 현대 stack에서 결정 구조 생존 (`05_results/pool_compare/`)
+
+LODO(3개로 학습, 1개 평가), 50회 반복, set-F1, ε_cal=0.005, ε_sel=0.01.
+modern = legacy에서 msmarco-MiniLM을 Qwen3-Embedding-0.6B로 교체(4-feature 분류기는 동일).
+
+| collection | stack | pool recall | best F1 | best policy | 1–2위 격차 | cal ok@10 | sel ok@10 | sel ok@50 |
+|---|---|---|---|---|---|---|---|---|
+| android | legacy | 0.852 | 0.315 | ad_probe | 0.008 | 0.52 | 0.88 | 0.94 |
+| android | modern | 0.865 | 0.356 | glob_probe | 0.023 | 0.26 | 0.86 | 0.84 |
+| scifact | legacy | 0.963 | 0.497 | glob_probe | 0.027 | 0.30 | 0.80 | 0.84 |
+| scifact | modern | 0.957 | 0.525 | glob_probe | 0.029 | 0.32 | 0.82 | 0.96 |
+| nfcorpus | legacy | 0.308 | 0.148 | ad_probe | 0.001 | 1.00 | 0.76 | 0.98 |
+| nfcorpus | modern | 0.321 | 0.159 | ad_probe | 0.003 | 0.88 | 0.84 | 0.88 |
+| arguana | legacy | 0.986 | 0.163 | glob_probe | 0.041 | 0.30 | 0.90 | 1.00 |
+| arguana | modern | 0.992 | 0.166 | glob_probe | 0.043 | 0.30 | 0.84 | 1.00 |
+
+판정: **GO.** 검색 성능은 오르지만(android F1 0.315→0.356) 정책 간 격차는 여전히 ε 규모
+(0.003–0.043)이고, android에서는 최적 정책 자체가 ad_probe→glob_probe로 바뀐다.
+즉 강한 검색기에서도 "어떤 절단 규칙을 배포할지"는 감사가 필요한 결정으로 남는다.
+보정 결정은 modern에서 오히려 어려워지는 경향(android cal ok@10 0.52→0.26).
+한계: 4-feature 분류기가 그대로라 Qwen3 신호는 pool 구성에만 들어갔다. qwen3e_cos를
+feature로 넣은 "fully modern" 변형은 후속.
