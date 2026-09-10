@@ -320,7 +320,7 @@ def main():
                     if state["split_ppi"] is None or state["split_auto"] is None:
                         Uh_all = menu_utils(HJ, c_tr, tau_tr, th_tr)
                         Uh_val = Uh_all[perm[ntr:T]]
-                        ucb_p = cert.ucb_ppi(U, Uh_val, Uh_all, cand, a_sel_sim)
+                        ucb_p = cert.ucb_ppi(U, Uh_val, Uh_all, cand, a_sel_sim, exclude_idx=perm[:T])
                         if state["split_ppi"] is None and ucb_p.max() <= EPS_SEL:
                             state["split_ppi"] = ("act", T, dict(pick=cand, c_hat=c_tr, tau_i=tau_tr, th_i=th_tr))
                         if state["split_auto"] is None:

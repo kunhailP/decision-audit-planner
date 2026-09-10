@@ -192,13 +192,16 @@ def ucb_t(U, cand, alpha_prime):
     return ucb
 
 
-def ucb_ppi(U, Uhat_lab, Uhat_all, cand, alpha_prime, crossfit=True):
+def ucb_ppi(U, Uhat_lab, Uhat_all, cand, alpha_prime, crossfit=True, exclude_idx=None):
     """PPI++ one-sided UCB for mu_j - mu_cand.
 
     U        (n, M) human utilities on audited queries
     Uhat_lab (n, M) judge utilities on the same audited queries
     Uhat_all (N, M) judge utilities on all target queries (incl. audited)
     """
+    if exclude_idx is not None and len(exclude_idx) < len(Uhat_all) - 2:
+        keep = np.ones(len(Uhat_all), bool); keep[np.asarray(exclude_idx)] = False
+        Uhat_all = Uhat_all[keep]           # Proposition B': N-mean taken outside the validation half
     n, N = len(U), len(Uhat_all)
     D = U - U[:, [cand]]
     Dh_lab = Uhat_lab - Uhat_lab[:, [cand]]

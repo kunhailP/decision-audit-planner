@@ -1,0 +1,19 @@
+{
+  "dbpedia-entity": {
+    "judge_acc": 0.759928061050892,
+    "rho_glob_probe_vs_trunc": 0.6346701559699902,
+    "err_in_glob_probe_vs_trunc": 0.25470557762044554,
+    "err_out_glob_probe_vs_trunc": 0.2352142323623277,
+    "band_frac_glob_probe_vs_trunc": 0.282239984403938,
+    "rho_glob_probe_vs_ad_probe": 0.5958460923845933,
+    "err_in_glob_probe_vs_ad_probe": 0.25945759198479873,
+    "err_out_glob_probe_vs_ad_probe": 0.2333491750967479,
+    "band_frac_glob_probe_vs_ad_probe": 0.28214250901647336,
+    "rho_trunc_vs_ad_probe": 0.69125284967909,
+    "err_in_trunc_vs_ad_probe": 0.2670532060027285,
+    "err_out_trunc_vs_ad_probe": 0.2363243489139088,
+    "band_frac_trunc_vs_ad_probe": 0.14289891802319915,
+    "n_queries": 399,
+    "c_star": 5.783582247815037
+  }
+}
