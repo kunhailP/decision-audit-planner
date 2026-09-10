@@ -44,6 +44,8 @@ def main():
     ap.add_argument("--train_dir", default=None); ap.add_argument("--train_names", nargs="+", default=["nfcorpus", "scifact", "arguana", "cqadupstack-android"])
     ap.add_argument("--budget_full", nargs="+", type=int, default=[20, 30, 45, 60, 90]); ap.add_argument("--eps", nargs="+", type=float, default=[0.01, 0.02])
     ap.add_argument("--n_train", type=int, default=20); ap.add_argument("--docs_per_query", type=int, default=4); ap.add_argument("--draws", type=int, default=300)
+    ap.add_argument("--force_worst", action="store_true", help="validity stress: candidate := true worst policy")
+    ap.add_argument("--boundary", action="store_true", help="sharp validity stress: candidate := runner-up, eps := 0.9 x its true regret (every ACT is a type-I error)")
     a = ap.parse_args()
     pv.NAMES = a.names; pv.JUDGE = a.judge
     data = pv.load_with_judge(os.path.join(a.pools, a.stack, "runs", "candidates"))
@@ -68,6 +70,10 @@ def main():
                     c_tr, tau_tr, _ = pv.fit_params([H[k] for k in tr]); arr = wa.arrays(H, HJ, c_tr, tau_tr)
                     cost_full = np.array([max(ks) for _, _, ks in arr], float)
                     U_tr = wa.prec_utils([arr[k] for k in tr]); cand = cert.pick_candidate(U_tr)
+                    if a.force_worst:
+                        cand = int(np.argmin(wa.prec_utils(arr).mean(axis=0)))
+                    if a.boundary:
+                        mu_all = wa.prec_utils(arr).mean(axis=0); cand = int(np.argsort(-mu_all)[1]); eps = 0.9 * float(mu_all.max() - mu_all[cand])
                     mu = wa.prec_utils(arr).mean(axis=0); regret = float(mu.max() - mu[cand]); others = [j for j in range(M) if j != cand]
                     B = Bq * float(cost_full.mean()) - float(cost_full[tr].sum())
                     if B <= 0:
@@ -116,7 +122,7 @@ def main():
                 print(f"{held} B={Bq}q eps={eps}: " + " ".join(f"{m}={cnt[m][0]/a.draws:.2f}" for m in ARMS) + f" | wrong max {max(v[1] for v in cnt.values())/a.draws:.3f}", flush=True)
     import pandas as pd
     out = os.path.join(HUB, "05_results", "sampling_baselines"); os.makedirs(out, exist_ok=True)
-    pd.DataFrame(rows).to_csv(os.path.join(out, f"baselines_{a.stack}_{a.judge}.csv"), index=False)
+    pd.DataFrame(rows).to_csv(os.path.join(out, f"baselines_{a.stack}_{a.judge}{'_forceworst' if a.force_worst else ''}{'_boundary' if a.boundary else ''}.csv"), index=False)
 
 
 if __name__ == "__main__":

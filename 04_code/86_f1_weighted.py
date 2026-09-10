@@ -17,7 +17,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); HUB = os.path.dirname(HERE)
 spec = importlib.util.spec_from_file_location("pv", os.path.join(HERE, "63_planner_v2.py")); pv = importlib.util.module_from_spec(spec); spec.loader.exec_module(pv)
 spec = importlib.util.spec_from_file_location("sb", os.path.join(HERE, "81_sampling_baselines.py")); sb = importlib.util.module_from_spec(spec); spec.loader.exec_module(sb)
 bc, cert, MENU = pv.bc, pv.cert, pv.MENU
-ALPHA = 0.10; ARMS = ["human_full", "weighted_lin", "judge_ppi", "weighted_lin_cv"]
+ALPHA = 0.10; ARMS = ["human_full", "weighted_plugin", "judge_ppi", "weighted_lin_cv", "weighted_lin_cv_bc"]
 
 
 def f1(y, k, nG):
@@ -38,6 +38,8 @@ def main():
     ap.add_argument("--train_dir", default=None); ap.add_argument("--train_names", nargs="+", default=["nfcorpus", "scifact", "arguana", "cqadupstack-android"])
     ap.add_argument("--budget_full", nargs="+", type=int, default=[30, 60, 90, 120]); ap.add_argument("--eps", nargs="+", type=float, default=[0.01, 0.02])
     ap.add_argument("--n_train", type=int, default=20); ap.add_argument("--docs_per_query", type=int, default=6); ap.add_argument("--draws", type=int, default=300)
+    ap.add_argument("--force_worst", action="store_true", help="validity stress: candidate := true worst policy")
+    ap.add_argument("--boundary", action="store_true", help="sharp validity stress: candidate := runner-up, eps := 0.9 x its true regret (every ACT is a type-I error)")
     a = ap.parse_args()
     pv.NAMES = a.names; pv.JUDGE = a.judge
     data = pv.load_with_judge(os.path.join(a.pools, a.stack, "runs", "candidates"))
@@ -59,7 +61,9 @@ def main():
                     c_tr, tau_tr, _ = pv.fit_params([H[k] for k in tr])
                     K = [[max(pv.cutoffs(H[k], m, c_tr, tau_tr), 1) for m in MENU] for k in range(N)]
                     U = np.array([[f1(Y[k], K[k][m], Y[k].sum()) for m in range(M)] for k in range(N)])
-                    cand = cert.pick_candidate(U[tr]); mu = U.mean(axis=0); regret = float(mu.max() - mu[cand]); others = [j for j in range(M) if j != cand]
+                    cand = (int(np.argmin(U.mean(axis=0))) if a.force_worst else (int(np.argsort(-U.mean(axis=0))[1]) if a.boundary else cert.pick_candidate(U[tr]))); mu = U.mean(axis=0); regret = float(mu.max() - mu[cand]); others = [j for j in range(M) if j != cand]
+                    if a.boundary:
+                        eps = 0.9 * regret
                     B = Bq * float(pool.mean()) - float(pool[tr].sum())
                     if B <= 0:
                         continue
@@ -77,31 +81,41 @@ def main():
                             up = cert.ucb_ppi(Uf, Uj_lab, Uj_all, cand, a_sim)
                             if up.max() <= eps:
                                 cnt["judge_ppi"][0] += 1; cnt["judge_ppi"][1] += regret > eps
-                    # weighted (linearised) arms
+                    # linearisation remainder on the pilot (fully labelled): r_q = D_true − D̂_lin(ĵ); used as bias correction
+                    resid = {}
+                    for j in others:
+                        rs = []
+                        for k in tr:
+                            y, jh = Y[k], J[k]; w, D0 = lin_weights(jh, K[k][j], K[k][cand])
+                            rs.append((f1(y, K[k][j], y.sum()) - f1(y, K[k][cand], y.sum())) - (D0 + float((w * (y - jh)).sum())))
+                        resid[j] = (float(np.mean(rs)), float(np.std(rs, ddof=1) / math.sqrt(len(rs))))
+                    pbar = float(np.mean([Y[k].mean() for k in tr]))                   # pilot base rate for the humans-only design
+                    # weighted arms
                     b = max(a.docs_per_query, int(math.ceil(B / len(rest)))); n_w = int(B // b); q_w = rest[:min(n_w, len(rest))]
                     if len(q_w) >= 5:
-                        ok_ht = ok_cv = True
+                        ok = {"weighted_plugin": True, "weighted_lin_cv": True, "weighted_lin_cv_bc": True}
                         for j in others:
-                            Dht, Dcv, Dtrue = [], [], []
+                            Dpl, Dcv, Dtrue = [], [], []
                             for k in q_w:
-                                y, jh = Y[k], J[k]; w, D0 = lin_weights(jh, K[k][j], K[k][cand]); n = len(y)
-                                pi = sb.sample_pi(np.abs(w), b, n); samp = (rng.random(n) < pi) & (pi > 0)
-                                corr = float((w[samp] * (y[samp] - jh[samp]) / pi[samp]).sum())
-                                Dcv.append(D0 + corr)
-                                # humans-only linearised HT: expand around zero predictions (ĵ ≡ 0 gives w from the true-label-free point)
-                                w0, D00 = lin_weights(np.zeros(n), K[k][j], K[k][cand]); pi0 = sb.sample_pi(np.abs(w0) + 1e-9, b, n); s0 = (rng.random(n) < pi0) & (pi0 > 0)
-                                Dht.append(D00 + float((w0[s0] * y[s0] / pi0[s0]).sum()))
-                                Dtrue.append(f1(y, K[k][j], y.sum()) - f1(y, K[k][cand], y.sum()))
+                                y, jh = Y[k], J[k]; n = len(y); ka, kb = K[k][j], K[k][cand]
+                                w, D0 = lin_weights(jh, ka, kb); pi = sb.sample_pi(np.abs(w), b, n); samp = (rng.random(n) < pi) & (pi > 0)
+                                Dcv.append(D0 + float((w[samp] * (y[samp] - jh[samp]) / pi[samp]).sum()))
+                                # humans-only plug-in: sample ∝ |w| at constant predictions p̄, HT-estimate tp_a, tp_b, nG, then plug into F1
+                                w0, _ = lin_weights(np.full(n, pbar), ka, kb); pi0 = sb.sample_pi(np.abs(w0) + 1e-9, b, n); s0 = (rng.random(n) < pi0) & (pi0 > 0)
+                                ht = lambda mask: float((y[s0 & mask] / pi0[s0 & mask]).sum())
+                                allm = np.ones(n, bool); ma = np.zeros(n, bool); ma[:ka] = True; mb = np.zeros(n, bool); mb[:kb] = True
+                                nGh, tpa, tpb = max(ht(allm), 1e-6), ht(ma), ht(mb)
+                                Dpl.append(2 * tpa / (ka + nGh) - 2 * tpb / (kb + nGh))
+                                Dtrue.append(f1(y, ka, y.sum()) - f1(y, kb, y.sum()))
                             bias.append(float(np.mean(Dcv) - np.mean(Dtrue)))
-                            for name, D in [("weighted_lin", np.array(Dht)), ("weighted_lin_cv", np.array(Dcv))]:
-                                nq = len(D); ucb = D.mean() + cert.t_quantile(1 - a_sim, nq - 1) * D.std(ddof=1) / math.sqrt(nq)
+                            for name, D, extra in [("weighted_plugin", np.array(Dpl), 0.0), ("weighted_lin_cv", np.array(Dcv), 0.0),
+                                                   ("weighted_lin_cv_bc", np.array(Dcv) + resid[j][0], resid[j][1])]:
+                                nq = len(D); ucb = D.mean() + cert.t_quantile(1 - a_sim, nq - 1) * math.sqrt(D.var(ddof=1) / nq + extra ** 2)
                                 if ucb > eps:
-                                    if name == "weighted_lin": ok_ht = False
-                                    else: ok_cv = False
-                        if ok_ht:
-                            cnt["weighted_lin"][0] += 1; cnt["weighted_lin"][1] += regret > eps
-                        if ok_cv:
-                            cnt["weighted_lin_cv"][0] += 1; cnt["weighted_lin_cv"][1] += regret > eps
+                                    ok[name] = False
+                        for name in ok:
+                            if ok[name]:
+                                cnt[name][0] += 1; cnt[name][1] += regret > eps
                 for m in ARMS:
                     rows.append(dict(collection=held, judge=a.judge, budget_full_eq=Bq, eps=eps, method=m, act=cnt[m][0] / a.draws, wrong=cnt[m][1] / a.draws,
                                      lin_bias=float(np.mean(bias)) if bias else float("nan"), lin_bias_abs=float(np.mean(np.abs(bias))) if bias else float("nan"),
@@ -109,7 +123,7 @@ def main():
                 print(f"{held} B={Bq}q eps={eps}: " + " ".join(f"{m}={cnt[m][0]/a.draws:.2f}/{cnt[m][1]/a.draws:.3f}" for m in ARMS) + f" | lin bias {np.mean(bias):+.4f} (|.| {np.mean(np.abs(bias)):.4f})", flush=True)
     import pandas as pd
     out = os.path.join(HUB, "05_results", "f1_weighted"); os.makedirs(out, exist_ok=True)
-    pd.DataFrame(rows).to_csv(os.path.join(out, f"f1_weighted_{a.stack}_{a.judge}.csv"), index=False)
+    pd.DataFrame(rows).to_csv(os.path.join(out, f"f1_weighted_{a.stack}_{a.judge}{'_forceworst' if a.force_worst else ''}{'_boundary' if a.boundary else ''}.csv"), index=False)
 
 
 if __name__ == "__main__":
