@@ -22,8 +22,8 @@ ax.set_ylabel("PPI effective-sample-size gain at T=10")
 ax.set_title("PPI gain follows decision-relevant agreement ρ, not judge accuracy")
 ax.grid(alpha=.25); ax.legend(fontsize=8); fig.tight_layout()
 fig.savefig(os.path.join(root, "F4_gain_vs_rho.png"), dpi=160)
-for st, g in d.groupby(["pool", "judge"]):
-    print(f"{st:8} n={len(g):2d} corr(gain,rho)={np.corrcoef(g['rho'], g['ess_gain'])[0,1]:.3f} "
+for (st, jd), g in d.groupby(["pool", "judge"]):
+    print(f"{st:8}/{jd:3} n={len(g):2d} corr(gain,rho)={np.corrcoef(g['rho'], g['ess_gain'])[0,1]:.3f} "
           f"corr(gain,acc)={np.corrcoef(g['judge_acc'], g['ess_gain'])[0,1]:.3f}")
 print(f"all      n={len(d):2d} corr(gain,rho)={np.corrcoef(d['rho'], d['ess_gain'])[0,1]:.3f} "
       f"corr(gain,acc)={np.corrcoef(d['judge_acc'], d['ess_gain'])[0,1]:.3f}")
