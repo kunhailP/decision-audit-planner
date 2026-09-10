@@ -23,7 +23,10 @@ spec = importlib.util.spec_from_file_location("wa", os.path.join(HERE, "80_weigh
 wa = importlib.util.module_from_spec(spec); spec.loader.exec_module(wa)
 bc, cert, MENU = pv.bc, pv.cert, pv.MENU
 ALPHA = 0.10
-ARMS = ["uniform", "weighted", "active_judge", "strat_pilot", "weighted_cv", "active_cv"]
+ARMS = ["uniform", "weighted", "active_judge", "strat_pilot", "weighted_cv", "active_cv", "weighted_cvl"]
+# weighted_cvl: control variate with a coefficient lambda estimated on the pilot (query-level regression of true D on
+# judge D over the pilot's fully labelled queries, clipped to [0,1]); lambda=0 recovers HT, so an adversarial judge
+# can no longer add variance (post-hoc addition after LOCK v0.5, see design doc §21.4).
 
 
 def sample_pi(base, b, n):
@@ -45,6 +48,7 @@ def main():
     ap.add_argument("--budget_full", nargs="+", type=int, default=[20, 30, 45, 60, 90]); ap.add_argument("--eps", nargs="+", type=float, default=[0.01, 0.02])
     ap.add_argument("--n_train", type=int, default=20); ap.add_argument("--docs_per_query", type=int, default=4); ap.add_argument("--draws", type=int, default=300)
     ap.add_argument("--force_worst", action="store_true", help="validity stress: candidate := true worst policy")
+    ap.add_argument("--tag", default="", help="suffix for the output file (e.g. _cvl)")
     ap.add_argument("--boundary", action="store_true", help="sharp validity stress: candidate := runner-up, eps := 0.9 x its true regret (every ACT is a type-I error)")
     a = ap.parse_args()
     pv.NAMES = a.names; pv.JUDGE = a.judge
@@ -91,6 +95,14 @@ def main():
                     if len(q_w) < 5:
                         continue
                     ok = {m: True for m in ARMS}
+                    # pilot lambda per pair: regress true paired difference on judge paired difference over the 20 pilot queries
+                    lam_pair = {}
+                    for j in others:
+                        dt, dj = [], []
+                        for k in tr:
+                            r, rj, ks = arr[k]; w = wa.weights(ks, j, cand, len(r)); dt.append(float((w * r).sum())); dj.append(float((w * rj).sum()))
+                        dt, dj = np.array(dt), np.array(dj); v = dj.var(ddof=1) if len(dj) > 1 else 0.0
+                        lam_pair[j] = float(np.clip(np.cov(dt, dj)[0, 1] / v, 0, 1)) if v > 0 else 0.0
                     for j in others:
                         est = {m: [] for m in ARMS}
                         for k in q_w:
@@ -100,9 +112,12 @@ def main():
                             bases = {"uniform": np.ones(n), "weighted": aw, "active_judge": aw * np.sqrt(np.clip(pj * (1 - pj), 1e-4, None)),
                                      "strat_pilot": aw * strat}
                             for m in ARMS:
-                                key = {"weighted_cv": "weighted", "active_cv": "active_judge"}.get(m, m)
+                                key = {"weighted_cv": "weighted", "active_cv": "active_judge", "weighted_cvl": "weighted"}.get(m, m)
                                 pi = sample_pi(bases[key], b, n); samp = (rng.random(n) < pi) & (pi > 0)
-                                if m.endswith("_cv"):
+                                if m == "weighted_cvl":
+                                    lm = lam_pair[j]
+                                    v = float(lm * (w * rj).sum() + (w[samp] * (r[samp] - lm * rj[samp]) / pi[samp]).sum())
+                                elif m.endswith("_cv"):
                                     v = float((w * rj).sum() + (w[samp] * (r[samp] - rj[samp]) / pi[samp]).sum())
                                 else:
                                     v = float((w[samp] * r[samp] / pi[samp]).sum())
@@ -122,7 +137,8 @@ def main():
                 print(f"{held} B={Bq}q eps={eps}: " + " ".join(f"{m}={cnt[m][0]/a.draws:.2f}" for m in ARMS) + f" | wrong max {max(v[1] for v in cnt.values())/a.draws:.3f}", flush=True)
     import pandas as pd
     out = os.path.join(HUB, "05_results", "sampling_baselines"); os.makedirs(out, exist_ok=True)
-    pd.DataFrame(rows).to_csv(os.path.join(out, f"baselines_{a.stack}_{a.judge}{'_forceworst' if a.force_worst else ''}{'_boundary' if a.boundary else ''}.csv"), index=False)
+    ap_tag = a.tag if hasattr(a, "tag") and a.tag else ""
+    pd.DataFrame(rows).to_csv(os.path.join(out, f"baselines_{a.stack}_{a.judge}{'_forceworst' if a.force_worst else ''}{'_boundary' if a.boundary else ''}{ap_tag}.csv"), index=False)
 
 
 if __name__ == "__main__":
