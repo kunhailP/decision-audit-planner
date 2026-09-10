@@ -101,3 +101,28 @@ localisation" was reaching for; its unconditional part is (a)–(b), and its val
 - Time-uniform (anytime-valid) version: replace the Bonferroni-over-looks with a confidence sequence for the paired
   mean (e.g. the PPI confidence sequence of Kilian et al. 2025); the conditional-validity argument is unchanged.
 - The ρ lower bound (adoption score) has no finite-sample guarantee; it is an efficiency device (see §13.2, §13.5).
+
+## Relation to active statistical inference (added 2026-09-10, after §18–19 experiments)
+
+Fix a query q, a pair (j, m̂), decision weights w_d (Prop. C), a judge ĵ_d ∈ [0,1], and Poisson sampling with inclusion
+probabilities π_d. The decision-weighted control-variate estimator used in this work is
+   D̂_CV(q) = Σ_d w_d ĵ_d + Σ_d ξ_d w_d (y_d − ĵ_d)/π_d,   ξ_d ~ Bernoulli(π_d) independent,
+with E[D̂_CV] = Σ_d w_d y_d for any ĵ and any π > 0 on {w_d ≠ 0}, and
+   Var[D̂_CV] = Σ_d w_d² (y_d − ĵ_d)² (1 − π_d)/π_d.
+This is exactly the active (prediction-powered) estimator of Zrnic & Candès (2024) written for the linear functional
+Σ_d w_d y_d instead of a mean: their "labelling budget allocation by predicted uncertainty" corresponds, under a budget
+Σ_d π_d = b, to the variance-minimising rule
+   π_d* ∝ |w_d| · sqrt( E[(y_d − ĵ_d)²] ).
+Our rule π_d ∝ |w_d| is the special case of a constant residual model; the "calibrated-judge" rule uses
+E[(y − ĵ)²] = ĵ(1 − ĵ); the "residual-estimated" rule fits E[(y − ĵ)²] on pilot labels. Hence:
+- the three rules coincide when residual magnitude is roughly constant across decision documents, which is what §19
+  measured (variance ratios 0.95–1.01 between |w| and the residual-estimated rule);
+- the calibrated-judge rule is worse whenever the judge is confidently wrong on decision documents (ĵ(1 − ĵ) ≈ 0 but
+  (y − ĵ)² ≈ 1), which is the failure §18 observed (variance 1.3–1.5×) and which Li et al. (2025) address by mixing with
+  a safe distribution; here the safe distribution is π ∝ |w_d| itself;
+- the judge never enters the unbiasedness, only the variance: this is the "judge as control variate, not as oracle"
+  principle and the doc-level form of Proposition B′.
+What is specific to this work is therefore not the estimator but (i) the identification of the functional — the
+per-document decision weights induced by a policy pair — and (ii) the certificate over a menu that consumes these
+estimates. The menu-level allocation question (which comparisons need precision, and how one label serves several)
+is the open part explored in EXPLORATION_menu_allocation.md.

@@ -1,0 +1,5 @@
+collection,judge,budget_full_eq,eps,method,act,wrong,nonoverlap
+dbpedia-entity,llm,45,0.02,static_sum,0.325,0.0,0.5639566147352886
+dbpedia-entity,llm,45,0.02,per_pair,0.425,0.0,0.5639566147352886
+dbpedia-entity,llm,45,0.02,adaptive,0.45,0.0,0.5639566147352886
+dbpedia-entity,llm,45,0.02,oracle,0.475,0.0,0.5639566147352886
