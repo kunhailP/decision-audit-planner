@@ -214,6 +214,7 @@ def main():
     ap.add_argument("--names", nargs="+", default=None, help="collections (default: BEIR four)")
     ap.add_argument("--judge", default="rr", help="rr | inv (1-rr, adversarial control) | llm | mpnet | any <name>_<judge>.csv")
     ap.add_argument("--looks", nargs="+", type=int, default=None)
+    ap.add_argument("--lambda_finite_n", action="store_true", help="post-hoc deviation: PPI++ lambda shrunk by 1/(1+n/N)")
     ap.add_argument("--menu4", action="store_true", help="add rr_thresh (Qwen3-Reranker threshold policy) to the menu")
     ap.add_argument("--train_dir", default=None, help="candidates dir of training-only collections")
     ap.add_argument("--train_names", nargs="+", default=["nfcorpus", "scifact", "arguana", "cqadupstack-android"])
@@ -222,6 +223,7 @@ def main():
     JUDGE = a.judge
     if a.looks:
         LOOKS = a.looks
+    cert.LAMBDA_FINITE_N = bool(a.lambda_finite_n)
     if a.menu4:
         MENU = MENU4
     if a.names:

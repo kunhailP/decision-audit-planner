@@ -122,15 +122,21 @@ def median_ci_exact(x, alpha):
     return float(x[k - 1]), float(x[n - k])
 
 
-def crossfit_lambda(d, dh):
+def crossfit_lambda(d, dh, n_over_N=0.0):
     """Cross-fitted PPI++ tuning (deterministic halves): lambda for each half
     is estimated on the other half, removing the in-sample optimism of a
-    lambda tuned and applied on the same audited queries."""
+    lambda tuned and applied on the same audited queries.
+
+    n_over_N: ratio of labeled to unlabeled sample sizes. The variance-optimal
+    PPI++ tuning with a finite unlabeled set is lambda* = Cov(d,dh)/Var(dh) /
+    (1 + n/N) (Angelopoulos et al. 2023, PPI++); the default 0.0 is the
+    N -> infinity formula used in the LOCK v0.4 primary run."""
     n = len(d); a, b = np.arange(n // 2), np.arange(n // 2, n)
     lam = np.zeros(n)
     for fit, apply in [(a, b), (b, a)]:
         v = dh[fit].var(ddof=1) if len(fit) > 1 else 0.0
-        lam[apply] = float(np.clip(np.cov(d[fit], dh[fit])[0, 1] / v, 0, 1)) if v > 0 and len(fit) > 1 else 0.0
+        raw = np.cov(d[fit], dh[fit])[0, 1] / v if v > 0 and len(fit) > 1 else 0.0
+        lam[apply] = float(np.clip(raw / (1.0 + n_over_N), 0, 1))
     return lam
 
 
@@ -192,6 +198,9 @@ def ucb_t(U, cand, alpha_prime):
     return ucb
 
 
+LAMBDA_FINITE_N = False   # post-hoc deviation switch (see design doc §14); LOCK v0.4 runs use False
+
+
 def ucb_ppi(U, Uhat_lab, Uhat_all, cand, alpha_prime, crossfit=True, exclude_idx=None):
     """PPI++ one-sided UCB for mu_j - mu_cand.
 
@@ -213,7 +222,7 @@ def ucb_ppi(U, Uhat_lab, Uhat_all, cand, alpha_prime, crossfit=True, exclude_idx
         if j == cand:
             continue
         if crossfit and n >= 6:
-            lam_vec = crossfit_lambda(D[:, j], Dh_lab[:, j])
+            lam_vec = crossfit_lambda(D[:, j], Dh_lab[:, j], n_over_N=(n / N if LAMBDA_FINITE_N else 0.0))
         else:
             v = Dh_lab[:, j].var(ddof=1)
             lam_vec = np.full(n, float(np.clip(np.cov(D[:, j], Dh_lab[:, j])[0, 1] / v, 0.0, 1.0)) if v > 0 else 0.0)

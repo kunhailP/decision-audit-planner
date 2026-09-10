@@ -29,6 +29,7 @@ def main():
     ap.add_argument("--budgets", nargs="+", type=int, default=[10, 20, 30])
     ap.add_argument("--draws", type=int, default=500)
     ap.add_argument("--train_dir", default=None); ap.add_argument("--train_names", nargs="+", default=["nfcorpus", "scifact", "arguana", "cqadupstack-android"])
+    ap.add_argument("--lambda_finite_n", action="store_true")
     a = ap.parse_args()
     pv.NAMES = a.names; pv.JUDGE = a.judge
     data = pv.load_with_judge(os.path.join(a.pools, a.stack, "runs", "candidates"))
@@ -56,9 +57,10 @@ def main():
                         idx = rng.choice(N, T, replace=False)
                         dS, dhS = d[idx], dh[idx]
                         se_h.append(dS.std(ddof=1) / math.sqrt(T))
-                        lam_vec = cert.crossfit_lambda(dS, dhS); lam = float(lam_vec.mean())
+                        mask = np.ones(N, bool); mask[idx] = False; dh_out = dh[mask]      # unlabeled = outside the audited draw
+                        lam_vec = cert.crossfit_lambda(dS, dhS, n_over_N=(T / len(dh_out) if a.lambda_finite_n else 0.0)); lam = float(lam_vec.mean())
                         resid = dS - lam_vec * dhS
-                        se_p.append(math.sqrt(lam ** 2 * dh.var(ddof=1) / N + resid.var(ddof=1) / T))
+                        se_p.append(math.sqrt(lam ** 2 * dh_out.var(ddof=1) / len(dh_out) + resid.var(ddof=1) / T))
                         lam_s.append(lam)
                     rows.append(dict(collection=held, judge=a.judge, pair=f"{MENU[ia]}_vs_{MENU[ib]}", T=T,
                                      n_queries=N, judge_acc=acc, rho=rho, true_gap=float(d.mean()),
@@ -69,7 +71,7 @@ def main():
     import pandas as pd
     df = pd.DataFrame(rows)
     out = os.path.join(HUB, "05_results", "ppi_gain"); os.makedirs(out, exist_ok=True)
-    df.to_csv(os.path.join(out, f"ppi_gain_{a.stack}_{a.judge}.csv"), index=False)
+    df.to_csv(os.path.join(out, f"ppi_gain_{a.stack}_{a.judge}{'_lamN' if a.lambda_finite_n else ''}.csv"), index=False)
     pd.set_option("display.width", 250)
     print(df.round(3).to_string(index=False))
 
