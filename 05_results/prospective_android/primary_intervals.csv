@@ -1,0 +1,3 @@
+decision,repeats,act,wrong,wrong_rate,wrong_rate_ci95,wrong_given_act,wrong_given_act_ci95,mean_T
+recalibration,50,22,0,0.0,"[0.000, 0.071]",0.0,"[0.000, 0.154]",76.0
+selection,50,40,4,0.08,"[0.022, 0.192]",0.1,"[0.028, 0.237]",48.8

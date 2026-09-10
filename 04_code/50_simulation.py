@@ -13,6 +13,9 @@ not with the decision's name.
 Recalibration arm: audited query i yields ratio observation c_i = c_T*exp(eta),
 eta ~ N(0, s); utility loss is curvature*|log(c_hat/c_T)| (monotone proxy).
 Budget scales with dispersion s and eps_cal only — independent of M and gap.
+v0.4: the recalibration arm now draws ONE audit stream per repeat and uses its
+first T observations at each look (cumulative auditing, as in the planner);
+v0.3 redrew a fresh sample at every look, which is not a sequential design.
 
 Seeds are explicit; no Date/random ambient state.
 """
@@ -76,8 +79,9 @@ def recal_cell(s_disp, curvature=0.02, reps=REPS):
         rng = np.random.default_rng(9_000_000 + int(s_disp * 1000) * 10_000 + rep)
         c_T = 1.0
         action, T_act, loss = "abstain", LOOKS[-1], None
+        stream = c_T * np.exp(rng.normal(0, s_disp, LOOKS[-1]))   # one cumulative audit stream
         for T in LOOKS:
-            obs = c_T * np.exp(rng.normal(0, s_disp, T))
+            obs = stream[:T]                                       # first T audits (v0.4 fix: was a fresh draw per look)
             c_hat = float(np.median(obs))
             bs = rng.integers(0, T, (BOOT, T))
             bmed = np.median(obs[bs], axis=1)

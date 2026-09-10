@@ -100,7 +100,7 @@ class Reranker:
         self.suffix = "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
 
     @torch.no_grad()
-    def score(self, pairs, batch=64, max_len=512):
+    def score(self, pairs, batch=128, max_len=384):
         out = np.zeros(len(pairs), np.float32)
         for s0 in range(0, len(pairs), batch):
             chunk = pairs[s0:s0 + batch]
@@ -110,6 +110,8 @@ class Reranker:
             logits = self.model(**enc, logits_to_keep=1).logits[:, -1, :]
             two = torch.stack([logits[:, self.no], logits[:, self.yes]], dim=1).float()
             out[s0:s0 + len(chunk)] = torch.softmax(two, dim=1)[:, 1].cpu().numpy()
+            if (s0 // batch) % 100 == 0:
+                log(f"    rr {s0}/{len(pairs)}")
         return out
 
 
@@ -143,8 +145,10 @@ def build(name, beir_root, out_root, emb_dir, reranker):
     log("  qwen3e done")
     did_index = {d: i for i, d in enumerate(dids)}
 
+    # ---- aggregate both stacks, score the union of pairs once with the reranker ----
+    per_stack = {}
     for st, systems in STACKS.items():
-        rows, meta, pairs = [], [], []
+        rows, meta = [], []
         for qi, qid in enumerate(qids):
             rel = qrels[qid]; G = {d for d, g in rel.items() if g > 0}
             meta.append([qid, len(G), len(rel)])
@@ -168,20 +172,23 @@ def build(name, beir_root, out_root, emb_dir, reranker):
                 cos = float(qemb_q3[qi] @ demb_q3[did_index[d]])
                 rows.append([qid, d, f"{info['score_norm']:.6f}", info["rank"], info["consensus"],
                              f"{lex:.6f}", int(d in bm25_top10), int(d in rel), grade, int(grade > 0),
-                             f"{cos:.6f}", None])
-                pairs.append((q_texts[qi], texts[d]))
-        log(f"  {st}: {len(rows)} pairs, reranker scoring")
-        rr = reranker.score(pairs)
-        for row, s in zip(rows, rr):
-            row[-1] = f"{s:.6f}"
+                             f"{cos:.6f}", None, qi])
+        per_stack[st] = (rows, meta)
+    union = sorted({(row[-1], row[1]) for rows, _ in per_stack.values() for row in rows})
+    log(f"  reranker scoring {len(union)} unique pairs (union of stacks)")
+    rr = reranker.score([(q_texts[qi], texts[d]) for qi, d in union])
+    rr_map = {k: float(v) for k, v in zip(union, rr)}
+    for st, (rows, meta) in per_stack.items():
+        for row in rows:
+            row[-2] = f"{rr_map[(row[-1], row[1])]:.6f}"
         with open(os.path.join(outs[st], f"{tag}.csv"), "w", newline="") as fc:
             w = csv.writer(fc)
             w.writerow(["qid", "docid", "score_norm", "rank", "consensus", "lexoverlap", "in_bm25top10",
                         "judged", "grade", "relevant", "qwen3e_cos", "rr_yes"])
-            w.writerows(rows)
+            w.writerows([row[:-1] for row in rows])
         with open(os.path.join(outs[st], f"{tag}_meta.csv"), "w", newline="") as fm:
             w = csv.writer(fm); w.writerow(["qid", "nG", "n_judged"]); w.writerows(meta)
-        log(f"  {st} saved")
+        log(f"  {st} saved ({len(rows)} rows)")
 
 
 if __name__ == "__main__":
