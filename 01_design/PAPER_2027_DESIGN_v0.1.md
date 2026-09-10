@@ -337,3 +337,33 @@ ESS 이득이 이론값(최대 4.5)에 못 미치는 것은 N=43·54의 Var(d̂)
 - bootstrap 하한을 dl1920 실자료에 적용: gain_lcb의 coverage 0.78–0.99 (reranker 0.89–0.99, LLM 0.78–0.89).
   N=97에서 n0=20–30은 모집단의 20–30%라 유한모집단 효과가 크다. N이 큰 pool에서 재평가하고,
   필요하면 BCa 또는 순열 기반 하한으로 교체한다. reranker 판정자에 대한 "사용 권고" 0–3%는 정답과 일치.
+
+### 10.3 완전 판정 BEIR pool (trec-covid 50q, webis-touche2020 49q, dbpedia-entity 399q) — reranker 판정자
+
+pool = 판정 문서를 corpus로 한 legacy pooling(4 시스템 top-30 합집합), 학습은 BEIR legacy 4개 pool.
+
+**PPI 이득(cross-fit λ)** — N이 크면 이득이 T와 함께 이론값으로 접근한다는 예측이 확인됨:
+
+| collection | N | 쌍 | ρ | 이득 T=10 | T=30 | T=90 | 이론 |
+|---|---|---|---|---|---|---|---|
+| dbpedia-entity | 399 | trunc vs ad | 0.57 | 1.17 | 1.28 | 1.27 | 1.48 |
+| dbpedia-entity | 399 | glob vs trunc | 0.54 | 1.14 | 1.21 | 1.25 | 1.41 |
+| trec-covid | 50 | trunc vs ad | 0.82 | 1.49 | 1.21 | – | 3.12 |
+| webis-touche | 49 | glob vs ad | 0.24 | 0.90 | 0.89 | – | 1.06 |
+
+**순차 인증서(dbpedia, look 10–90, 50회)** — query가 많은 완전 판정 pool에서의 첫 비교:
+
+| method | ACT | mean T | wrong |
+|---|---|---|---|
+| loo_boot (v0.3) | 0.90 | 57 | **0.16** |
+| loo_sim | 0.74 | 70 | 0.10 |
+| split_t | 0.14 | 88 | 0.00 |
+| split_ppi (reranker) | 0.18 | 86 | 0.00 |
+| recal_ep (v0.3) | 0.14 | 85 | 0.10 |
+| recal_bpx | 0.02 | 90 | 0.00 |
+
+- v0.3 선택 인증서는 dbpedia에서 오류율 0.16으로 α를 명확히 넘는다(MC SE 0.04). 동시보정으로 0.10.
+- 유효한 split 인증서에 PPI를 더하면 오류 0을 유지하며 ACT가 0.14→0.18. 판정자가 약해(ρ≈0.5) 이득은 작다.
+  LLM 판정자로 재계산 예정.
+- 판정자 오류의 구간 집중은 이 세 pool에서는 약하다(dbpedia 0.29–0.34 vs 0.27). 집중 여부는 collection·판정자에
+  따라 다르며, 그래서 사전 진단이 필요하다.
