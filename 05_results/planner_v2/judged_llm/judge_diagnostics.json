@@ -1,0 +1,36 @@
+{
+  "webis-touche2020": {
+    "judge_acc": 0.7868675995694295,
+    "rho_glob_probe_vs_trunc": 0.7734084902378262,
+    "err_in_glob_probe_vs_trunc": 0.24472573839662448,
+    "err_out_glob_probe_vs_trunc": 0.20851326341764342,
+    "band_frac_glob_probe_vs_trunc": 0.12755651237890203,
+    "rho_glob_probe_vs_ad_probe": 0.4276806401343798,
+    "err_in_glob_probe_vs_ad_probe": 0.2641509433962264,
+    "err_out_glob_probe_vs_ad_probe": 0.2100456621004566,
+    "band_frac_glob_probe_vs_ad_probe": 0.05705059203444564,
+    "rho_trunc_vs_ad_probe": 0.8435523152063422,
+    "err_in_trunc_vs_ad_probe": 0.24413145539906103,
+    "err_out_trunc_vs_ad_probe": 0.20911854103343466,
+    "band_frac_trunc_vs_ad_probe": 0.11463939720129171,
+    "n_queries": 49,
+    "c_star": 4.267429710295368
+  },
+  "dbpedia-entity": {
+    "judge_acc": 0.7605113498274437,
+    "rho_glob_probe_vs_trunc": 0.6623630330048812,
+    "err_in_glob_probe_vs_trunc": 0.24178272980501392,
+    "err_out_glob_probe_vs_trunc": 0.23924126555705502,
+    "band_frac_glob_probe_vs_trunc": 0.349936640998148,
+    "rho_glob_probe_vs_ad_probe": 0.604846554510467,
+    "err_in_glob_probe_vs_ad_probe": 0.24915682967959527,
+    "err_out_glob_probe_vs_ad_probe": 0.2353380092523504,
+    "band_frac_glob_probe_vs_ad_probe": 0.34681742859927867,
+    "rho_trunc_vs_ad_probe": 0.6553498232191219,
+    "err_in_trunc_vs_ad_probe": 0.29584261321455085,
+    "err_out_trunc_vs_ad_probe": 0.2317100538599641,
+    "band_frac_trunc_vs_ad_probe": 0.131299346914904,
+    "n_queries": 399,
+    "c_star": 4.780310536677252
+  }
+}

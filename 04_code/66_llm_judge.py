@@ -40,7 +40,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cand", required=True); ap.add_argument("--texts", required=True)
     ap.add_argument("--queries", nargs="+", required=True); ap.add_argument("names", nargs="+")
-    ap.add_argument("--batch", type=int, default=16)
+    ap.add_argument("--batch", type=int, default=16); ap.add_argument("--max_chars", type=int, default=2500)
     a = ap.parse_args()
     from transformers import AutoTokenizer, AutoModelForCausalLM
     tok = AutoTokenizer.from_pretrained(MODEL, padding_side="left")
@@ -59,7 +59,7 @@ def main():
         rows = list(csv.DictReader(open(fp)))
         prompts = []
         for r in rows:
-            msg = PROMPT.format(query=queries[r["qid"]], passage=texts[r["docid"]][:2500])
+            msg = PROMPT.format(query=queries[r["qid"]], passage=texts[r["docid"]][:a.max_chars])
             chat = tok.apply_chat_template([{"role": "user", "content": msg}], tokenize=False,
                                            add_generation_prompt=True, enable_thinking=False)
             prompts.append(chat + "##final score: ")
@@ -69,7 +69,10 @@ def main():
             for s0 in range(0, len(prompts), a.batch):
                 enc = tok(prompts[s0:s0 + a.batch], return_tensors="pt", padding=True,
                           truncation=True, max_length=1024).to("cuda")
-                logits = model(**enc, logits_to_keep=1).logits[:, -1, :].float()
+                # left padding: give real tokens positions 0..L-1 (a plain forward would use
+                # arange over the padded width and shift RoPE for heavily padded rows)
+                pos = (enc["attention_mask"].cumsum(-1) - 1).clamp(min=0)
+                logits = model(**enc, position_ids=pos, logits_to_keep=1).logits[:, -1, :].float()
                 out[s0:s0 + len(enc["input_ids"])] = torch.softmax(logits[:, grade_ids], dim=1).cpu().numpy()
                 if (s0 // a.batch) % 50 == 0:
                     log(f"  {s0}/{len(prompts)}")
