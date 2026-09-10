@@ -11,3 +11,8 @@ runs/candidates/
 
 # Keep manifests and small fixtures under version control
 !09_artifact/fixtures/
+06_paper/tmlr_submission/*.aux
+06_paper/tmlr_submission/*.log
+06_paper/tmlr_submission/*.out
+06_paper/tmlr_submission/*.bbl
+06_paper/tmlr_submission/*.blg
