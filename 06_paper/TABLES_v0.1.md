@@ -50,6 +50,24 @@
 | weighted_cv | Qwen3-8B | 미도달 | 2,573 | 0.44 | 0.000 |
 | weighted_cv | Qwen3-Reranker | 미도달 | 2,573 | 0.41 | 0.000 |
 
+**dbpedia-entity, ε = 0.0138365041741949**
+
+| method | 판정자 | J50 (판정 쌍) | 최대 예산 (판정 쌍) | 최대 ACT | wrong |
+|---|---|---:|---:|---:|---:|
+| strat_pilot | — | 미도달 | 1,715 | 0.00 | 0.003 |
+| uniform | — | 미도달 | 1,715 | 0.00 | 0.000 |
+| weighted | — | 미도달 | 1,715 | 0.01 | 0.010 |
+| weighted_cv | Qwen3-8B | 미도달 | 1,715 | 0.00 | 0.000 |
+
+**dbpedia-entity, ε = 0.0169009546669507**
+
+| method | 판정자 | J50 (판정 쌍) | 최대 예산 (판정 쌍) | 최대 ACT | wrong |
+|---|---|---:|---:|---:|---:|
+| strat_pilot | — | 미도달 | 2,573 | 0.00 | 0.000 |
+| uniform | — | 미도달 | 2,573 | 0.02 | 0.020 |
+| weighted | — | 미도달 | 2,573 | 0.00 | 0.000 |
+| weighted_cv | Qwen3-8B | 미도달 | 2,573 | 0.00 | 0.000 |
+
 **dbpedia-entity, ε = 0.02**
 
 | method | 판정자 | J50 (판정 쌍) | 최대 예산 (판정 쌍) | 최대 ACT | wrong |
@@ -89,6 +107,24 @@
 | uniform | — | 3,207 | 3,631 | 0.61 | 0.003 |
 | weighted | — | 1,273 | 3,631 | 0.89 | 0.000 |
 | weighted_cv | Qwen3-8B | 1,256 | 3,631 | 0.89 | 0.000 |
+
+**dl212223, ε = 0.0265861701992643**
+
+| method | 판정자 | J50 (판정 쌍) | 최대 예산 (판정 쌍) | 최대 ACT | wrong |
+|---|---|---:|---:|---:|---:|
+| strat_pilot | — | 미도달 | 2,421 | 0.00 | 0.003 |
+| uniform | — | 미도달 | 2,421 | 0.03 | 0.030 |
+| weighted | — | 미도달 | 2,421 | 0.00 | 0.000 |
+| weighted_cv | Qwen3-8B | 미도달 | 2,421 | 0.00 | 0.000 |
+
+**dl212223, ε = 0.0390712013741052**
+
+| method | 판정자 | J50 (판정 쌍) | 최대 예산 (판정 쌍) | 최대 ACT | wrong |
+|---|---|---:|---:|---:|---:|
+| strat_pilot | — | 미도달 | 3,631 | 0.00 | 0.000 |
+| uniform | — | 미도달 | 3,631 | 0.01 | 0.013 |
+| weighted | — | 미도달 | 3,631 | 0.00 | 0.000 |
+| weighted_cv | Qwen3-8B | 미도달 | 3,631 | 0.00 | 0.000 |
 
 ## C 4-policy menu, precision
 
@@ -135,3 +171,51 @@
 | oracle | Qwen3-8B | 1,540 | 3,631 | 0.84 | 0.000 |
 | per_pair | Qwen3-8B | 1,633 | 3,631 | 0.73 | 0.000 |
 | static_sum | Qwen3-8B | 1,562 | 3,631 | 0.84 | 0.000 |
+
+## D doc-level, set-F1 (linearised; see caveat)
+
+**dbpedia-entity, ε = 0.01**
+
+| method | 판정자 | J50 (판정 쌍) | 최대 예산 (판정 쌍) | 최대 ACT | wrong |
+|---|---|---:|---:|---:|---:|
+| human_full | — | 4,881 | 6,171 | 0.67 | 0.000 |
+| judge_ppi | Qwen3-8B | 4,163 | 6,171 | 0.75 | 0.000 |
+| judge_ppi | Qwen3-Reranker | 5,044 | 6,171 | 0.65 | 0.000 |
+| weighted_lin_cv | Qwen3-8B | 2,927 | 6,171 | 0.81 | 0.000 |
+| weighted_lin_cv | Qwen3-Reranker | 2,233 | 6,171 | 0.82 | 0.000 |
+| weighted_lin_cv_bc | Qwen3-8B | 미도달 | 6,171 | 0.50 | 0.000 |
+| weighted_lin_cv_bc | Qwen3-Reranker | 5,899 | 6,171 | 0.51 | 0.000 |
+| weighted_plugin | — | 1,675 | 6,171 | 0.81 | 0.000 |
+
+**dbpedia-entity, ε = 0.02**
+
+| method | 판정자 | J50 (판정 쌍) | 최대 예산 (판정 쌍) | 최대 ACT | wrong |
+|---|---|---:|---:|---:|---:|
+| human_full | — | 3,680 | 6,171 | 0.81 | 0.000 |
+| judge_ppi | Qwen3-8B | 2,962 | 6,171 | 0.82 | 0.000 |
+| judge_ppi | Qwen3-Reranker | 3,471 | 6,171 | 0.81 | 0.000 |
+| weighted_lin_cv | Qwen3-8B | 2,456 | 6,171 | 0.87 | 0.000 |
+| weighted_lin_cv | Qwen3-Reranker | 1,633 | 6,171 | 0.87 | 0.000 |
+| weighted_lin_cv_bc | Qwen3-8B | 3,144 | 6,171 | 0.68 | 0.000 |
+| weighted_lin_cv_bc | Qwen3-Reranker | 2,876 | 6,171 | 0.67 | 0.000 |
+| weighted_plugin | — | 1,543 | 6,171 | 0.87 | 0.000 |
+
+**dl212223, ε = 0.01**
+
+| method | 판정자 | J50 (판정 쌍) | 최대 예산 (판정 쌍) | 최대 ACT | wrong |
+|---|---|---:|---:|---:|---:|
+| human_full | — | 3,465 | 8,324 | 0.94 | 0.000 |
+| judge_ppi | Qwen3-8B | 3,555 | 8,324 | 0.93 | 0.000 |
+| weighted_lin_cv | Qwen3-8B | 2,081 | 8,324 | 0.97 | 0.000 |
+| weighted_lin_cv_bc | Qwen3-8B | 2,520 | 8,324 | 0.83 | 0.000 |
+| weighted_plugin | — | 2,081 | 8,324 | 0.97 | 0.000 |
+
+**dl212223, ε = 0.02**
+
+| method | 판정자 | J50 (판정 쌍) | 최대 예산 (판정 쌍) | 최대 ACT | wrong |
+|---|---|---:|---:|---:|---:|
+| human_full | — | 3,167 | 8,324 | 0.97 | 0.000 |
+| judge_ppi | Qwen3-8B | 3,137 | 8,324 | 0.96 | 0.000 |
+| weighted_lin_cv | Qwen3-8B | 2,081 | 8,324 | 0.97 | 0.000 |
+| weighted_lin_cv_bc | Qwen3-8B | 2,081 | 8,324 | 0.91 | 0.000 |
+| weighted_plugin | — | 2,081 | 8,324 | 0.97 | 0.000 |

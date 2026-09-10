@@ -81,6 +81,20 @@ add_block(os.path.join(R, "sampling_baselines", "baselines_*.csv"), "B doc-level
           lambda j, m: jname.get(j, j) if m.endswith("_cv") else "—")
 add_block(os.path.join(R, "active_inference", "active_*.csv"), "B doc-level, precision", ["ai_calib", "ai_resid", "ai_robust_0.5"], lambda j, m: jname.get(j, j))
 add_block(os.path.join(R, "menu_allocation", "menu_alloc_*.csv"), "C 4-policy menu, precision", ["static_sum", "per_pair", "adaptive", "oracle"], lambda j, m: jname.get(j, j))
+# ---------- Block D: document-level, set-F1 (linearised / plug-in) ----------
+for f in glob.glob(os.path.join(R, "f1_weighted", "f1_weighted_*.csv")):
+    if "forceworst" in f or "boundary" in f:
+        continue
+    d = pd.read_csv(f)
+    for (c, j, e), g in d.groupby(["collection", "judge", "eps"]):
+        for m in ["human_full", "weighted_plugin", "judge_ppi", "weighted_lin_cv", "weighted_lin_cv_bc"]:
+            s_ = g[g.method == m].sort_values("budget_full_eq")
+            if s_.empty:
+                continue
+            docs = s_.docs.values; j50 = interp_first(docs, s_.act.values)
+            rows.append(dict(block="D doc-level, set-F1 (linearised; see caveat)", collection=c, judge=jname.get(j, j) if m not in ("human_full", "weighted_plugin") else "—",
+                             method=m, eps=e, J50_docs=j50, J50_queries=np.nan, wrong_rate=float(s_.wrong.max()), n=300,
+                             max_budget_docs=float(docs.max()), max_act=float(s_.act.max())))
 df = pd.DataFrame(rows).drop_duplicates(subset=["block", "collection", "judge", "method", "eps"]); df.to_csv(os.path.join(OUT, "J50.csv"), index=False)
 
 # ---------- manuscript table ----------
