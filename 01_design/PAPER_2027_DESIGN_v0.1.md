@@ -131,3 +131,30 @@ PPI++ paired 인증서의 유효표본 이득은 `1/(1 − ρ_{jm}²)`이며, �
 
 40_planner_replay.py 보정 인증서의 끝점 검사, LOO bootstrap의 유효성, 50_simulation.py의
 look별 재표집, 70_prospective_run.py의 구간 보고. 판정자를 도입해도 그대로 남는다.
+
+## 9. 착수 기록 (2026-09-10, branch `2027-nonneutral-judge`)
+
+### 9.1 확인된 사실 (합성 자료, `04_code/lib/certificates.py` self-test)
+
+- **끝점 검사 결함 재현**: 단일 query 예에서 끝점 spread 0.000, breakpoint 전수 검사 spread 0.167.
+  v0.4 보정 인증서는 구간 안의 모든 gate breakpoint를 검사한다(`recal_spread`).
+- **후보 선택의 winner's curse**: 후보를 같은 자료에서 고르고 M−1개 비교만 보정하면
+  정확한 t-구간을 써도 look당 위험이 0.049 (예산 0.020). 모든 순서쌍 M(M−1)을 동시
+  보정하면 0.014. v0.3의 Proposition 1은 "후보가 고정"일 때만 성립했다.
+- PPI++ paired UCB도 같은 동시 보정 아래 0.006으로 유효.
+
+### 9.2 P4 prospective 결과의 구간 (`71_prospective_report.py`, 재실행 없음)
+
+| decision | ACT | wrong | wrong rate [CP 95%] | wrong given ACT [CP 95%] |
+|---|---|---|---|---|
+| recalibration | 22/50 | 0 | 0.00 [0.000, 0.071] | 0.00 [0.000, 0.154] |
+| selection | 40/50 | 4 | 0.08 [0.022, 0.192] | 0.10 [0.028, 0.237] |
+
+### 9.3 진행 중인 실험 (이 환경: RTX 3090, 256 CPU)
+
+- `61_build_pool.py`: nfcorpus / scifact / arguana / cqadupstack-android에 대해 legacy·modern
+  두 stack의 후보 pool + Qwen3-Reranker P(yes) judge proxy.
+- `62_pool_compare.py`: go/no-go #1 — 현대 stack에서 격차 구조 생존 여부.
+- `63_planner_v2.py`: loo_boot(v0.3) / split_t / split_ppi 인증서 비교 + judge 진단
+  (전체 정확도, ρ, 불일치 구간 안팎 오류율).
+- `64_trecdl_pool.py`: TREC DL 2019/2020 완전 판정 pool (go/no-go #2 testbed).
