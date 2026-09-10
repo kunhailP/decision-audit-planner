@@ -6,7 +6,7 @@ dbpedia-entity,recal_bpu,0.0,190.0,0.0
 dbpedia-entity,recal_bpx,0.032,188.1,0.006
 dbpedia-entity,recal_bpxu,0.0,190.0,0.0
 dbpedia-entity,recal_ep,0.136,174.38,0.064
-dbpedia-entity,split_ppi,0.488,164.52,0.0
+dbpedia-entity,split_ppi,0.468,164.92,0.0
 dbpedia-entity,split_t,0.316,175.54,0.002
 trec-covid,loo_boot,0.686,10.0,0.01
 trec-covid,loo_sim,0.626,10.0,0.006
