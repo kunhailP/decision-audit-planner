@@ -64,8 +64,9 @@ def load_with_judge(cand_dir):
         slices = [(qids[a], a, b) for a, b in zip(bounds[:-1], bounds[1:]) if nG.get(qids[a], 0) > 0]
         jrel = (rr >= JUDGE_THR).astype(np.int8)
         jnG = {q: int(jrel[a:b].sum()) for q, a, b in slices}
-        data[name] = dict(X=X, rel=rel, slices=slices, nG=nG, rr=rr,
-                          judge=dict(X=X, rel=jrel, slices=slices, nG=jnG))
+        rr_raw = np.array([float(r["rr_yes"]) for r in csv.DictReader(open(fp))], np.float32)[order]  # always the reranker
+        data[name] = dict(X=X, rel=rel, slices=slices, nG=nG, rr=rr, rr_raw=rr_raw,
+                          judge=dict(X=X, rel=jrel, slices=slices, nG=jnG, rr_raw=rr_raw))
     return data
 
 
@@ -79,6 +80,29 @@ def load_train_only(train_dir, train_names):
     extra = load_with_judge(train_dir)
     NAMES = saved; TRAIN_ONLY = set(extra)
     return extra
+
+
+RR_GRID = np.linspace(0.05, 0.95, 19)
+MENU4 = ["glob_probe", "trunc", "ad_probe", "rr_thresh"]
+
+
+def attach_rr(structs, d, P):
+    """Per-doc Qwen3-Reranker score in the struct's (descending P) order, plus set-F1 of the
+    reranker-threshold policy on the RR_GRID (true relevance from cumtp)."""
+    idx = 0
+    slices = [(q, a, b) for q, a, b in d["slices"]]
+    by_q = {q: (a, b) for q, a, b in slices}
+    for s in structs:
+        a, b = by_q[s["qid"]]
+        p = P[a:b]; o = np.argsort(-p)
+        s["rr_sorted"] = d["rr_raw"][a:b][o]
+        rel = np.diff(np.r_[0, s["cumtp"]])
+        f = []
+        for th in RR_GRID:
+            m = s["rr_sorted"] >= th; k = int(m.sum()); tp = int((rel * m).sum())
+            f.append(2.0 * tp / (k + s["nG"]) if tp > 0 else 0.0)
+        s["f_rr"] = np.array(f)
+    return structs
 
 
 def fit_lodo(data, held, rng_global):
@@ -117,11 +141,14 @@ def finalize(H, reg):
     return c_star
 
 
-def utils(structs, c_hat, tau_i):
+def utils(structs, c_hat, tau_i, th_i=None):
     ad = np.array([bc.f1_at_k(s["cumtp"], bc.gate_k(s["sp"], s["cump"], c_hat * s["Sp"]), s["nG"]) for s in structs])
     gl = np.array([float(s["f_tau"][tau_i]) for s in structs])
     tr = np.array([s["f_trunc"] for s in structs])
-    return np.stack([gl, tr, ad], axis=1)          # MENU order
+    cols = [gl, tr, ad]
+    if th_i is not None:
+        cols.append(np.array([float(s["f_rr"][th_i]) for s in structs]))
+    return np.stack(cols, axis=1)          # MENU order (+ rr_thresh)
 
 
 def fit_params(probe):
@@ -131,7 +158,17 @@ def fit_params(probe):
     return c_hat, tau_i, ratios
 
 
+def fit_theta(probe):
+    return int(np.argmax(np.mean([s["f_rr"] for s in probe], axis=0)))
+
+
+def menu_utils(structs, c_hat, tau_i, th_i):
+    return utils(structs, c_hat, tau_i, th_i if len(MENU) == 4 else None)
+
+
 def cutoffs(s, name, c, tau_i):
+    if name == "rr_thresh":
+        return int((s["rr_sorted"] >= RR_GRID[fit_theta([s])]).sum())   # diagnostic only
     if name == "ad_probe":
         return bc.gate_k(s["sp"], s["cump"], c * s["Sp"])
     if name == "glob_probe":
@@ -144,7 +181,8 @@ def judge_diagnostics(H, HJ, rr_pairs, rel_pairs, c_star, tau_i):
     pair-level accuracy, and for every policy pair the paired-difference
     correlation rho and the judge error rate inside vs outside the
     disagreement band (docs ranked between the two cutoffs)."""
-    U = utils(H, c_star, tau_i); Uh = utils(HJ, c_star, tau_i)
+    th_i = fit_theta(H) if len(MENU) == 4 else None
+    U = utils(H, c_star, tau_i, th_i); Uh = utils(HJ, c_star, tau_i, th_i)
     out = dict(judge_acc=float(((rr_pairs >= JUDGE_THR).astype(int) == rel_pairs).mean()))
     for a in range(len(MENU)):
         for b in range(a + 1, len(MENU)):
@@ -171,14 +209,17 @@ def main():
     ap.add_argument("--out", default=None)
     ap.add_argument("--names", nargs="+", default=None, help="collections (default: BEIR four)")
     ap.add_argument("--judge", default="rr", choices=["rr", "llm"])
+    ap.add_argument("--menu4", action="store_true", help="add rr_thresh (Qwen3-Reranker threshold policy) to the menu")
     ap.add_argument("--train_dir", default=None, help="candidates dir of training-only collections")
     ap.add_argument("--train_names", nargs="+", default=["nfcorpus", "scifact", "arguana", "cqadupstack-android"])
     a = ap.parse_args()
-    global NAMES, JUDGE
+    global NAMES, JUDGE, MENU
     JUDGE = a.judge
+    if a.menu4:
+        MENU = MENU4
     if a.names:
         NAMES = a.names
-    out = a.out or os.path.join(HUB, "05_results", "planner_v2", a.stack + ("" if a.judge == "rr" else "_" + a.judge)); os.makedirs(out, exist_ok=True)
+    out = a.out or os.path.join(HUB, "05_results", "planner_v2", a.stack + ("" if a.judge == "rr" else "_" + a.judge) + ("_menu4" if a.menu4 else "")); os.makedirs(out, exist_ok=True)
     cand_dir = os.path.join(a.pools, a.stack, "runs", "candidates")
     data = load_with_judge(cand_dir)
     if a.train_dir:
@@ -192,10 +233,10 @@ def main():
 
     for held in [d for d in data if d not in TRAIN_ONLY]:
         P, structs, reg = fit_lodo(data, held, rng_global)
-        H = structs[held]; c_star = finalize(H, reg)
+        H = structs[held]; c_star = finalize(H, reg); attach_rr(H, data[held], P[held])
         # judge structs: same P ordering, judge relevance and judge nG
         jd = {held: data[held]["judge"]}
-        HJ = bc.build_structs(jd, held, P[held]); finalize(HJ, reg)
+        HJ = bc.build_structs(jd, held, P[held]); finalize(HJ, reg); attach_rr(HJ, data[held]["judge"], P[held])
         assert [s["qid"] for s in H] == [s["qid"] for s in HJ]
         cert.prepare_gate(H)
         n = len(H); cap = n // 2
@@ -215,7 +256,7 @@ def main():
             state = {m: None for m in ["recal_bp", "recal_ep", "recal_bpx", "recal_bpu", "recal_bpxu", "loo_boot", "loo_sim", "split_t", "split_ppi"]}
             for T in looks:
                 probe = [H[i] for i in perm[:T]]
-                c_hat, tau_i, ratios = fit_params(probe)
+                c_hat, tau_i, ratios = fit_params(probe); th_i = fit_theta(probe)
                 # ---- recalibration (full probe) ----
                 if any(state[k] is None for k in ["recal_bp", "recal_ep", "recal_bpx", "recal_bpu", "recal_bpxu"]):
                     bs = rng_m["recal"].integers(0, len(ratios), (BOOT, len(ratios)))
@@ -238,6 +279,7 @@ def main():
                 if state["loo_boot"] is None or state["loo_sim"] is None:
                     ratios_all = np.array([s["nG"] / s["Sp"] if s["Sp"] > 0 else np.nan for s in probe])
                     F = np.stack([s["f_tau"] for s in probe]); colsum = F.sum(axis=0)
+                    FR = np.stack([s["f_rr"] for s in probe]); colsum_r = FR.sum(axis=0)
                     U = np.empty((T, len(MENU)))
                     for i, s in enumerate(probe):
                         others = np.delete(ratios_all, i); others = others[~np.isnan(others)]
@@ -245,44 +287,46 @@ def main():
                         U[i, 2] = bc.f1_at_k(s["cumtp"], bc.gate_k(s["sp"], s["cump"], c_loo * s["Sp"]), s["nG"])
                         U[i, 0] = float(s["f_tau"][int(np.argmax(colsum - F[i]))])
                         U[i, 1] = s["f_trunc"]
+                        if len(MENU) == 4:
+                            U[i, 3] = float(s["f_rr"][int(np.argmax(colsum_r - FR[i]))])
                     cand = cert.pick_candidate(U)
                     if state["loo_boot"] is None:
                         ucb = cert.ucb_bootstrap(U, cand, a_sel_legacy, rng_m["loo_boot"], BOOT)
                         if ucb.max() <= EPS_SEL:
-                            state["loo_boot"] = ("act", T, dict(pick=cand, c_hat=c_hat, tau_i=tau_i))
+                            state["loo_boot"] = ("act", T, dict(pick=cand, c_hat=c_hat, tau_i=tau_i, th_i=th_i))
                     if state["loo_sim"] is None:
                         ucb = cert.ucb_bootstrap(U, cand, a_sel_sim, rng_m["loo_sim"], BOOT)
                         if ucb.max() <= EPS_SEL:
-                            state["loo_sim"] = ("act", T, dict(pick=cand, c_hat=c_hat, tau_i=tau_i))
+                            state["loo_sim"] = ("act", T, dict(pick=cand, c_hat=c_hat, tau_i=tau_i, th_i=th_i))
                 # ---- split designs ----
                 if state["split_t"] is None or state["split_ppi"] is None:
                     ntr = T // 2
                     train = [H[i] for i in perm[:ntr]]; val = [H[i] for i in perm[ntr:T]]
-                    c_tr, tau_tr, _ = fit_params(train)
-                    U = utils(val, c_tr, tau_tr)
+                    c_tr, tau_tr, _ = fit_params(train); th_tr = fit_theta(train)
+                    U = menu_utils(val, c_tr, tau_tr, th_tr)
                     cand = cert.pick_candidate(U)
                     if state["split_t"] is None:
                         ucb = cert.ucb_t(U, cand, a_sel_sim)
                         if ucb.max() <= EPS_SEL:
-                            state["split_t"] = ("act", T, dict(pick=cand, c_hat=c_tr, tau_i=tau_tr))
+                            state["split_t"] = ("act", T, dict(pick=cand, c_hat=c_tr, tau_i=tau_tr, th_i=th_tr))
                     if state["split_ppi"] is None:
-                        Uh_all = utils(HJ, c_tr, tau_tr)
+                        Uh_all = menu_utils(HJ, c_tr, tau_tr, th_tr)
                         Uh_val = Uh_all[perm[ntr:T]]
                         ucb = cert.ucb_ppi(U, Uh_val, Uh_all, cand, a_sel_sim)
                         if ucb.max() <= EPS_SEL:
-                            state["split_ppi"] = ("act", T, dict(pick=cand, c_hat=c_tr, tau_i=tau_tr))
+                            state["split_ppi"] = ("act", T, dict(pick=cand, c_hat=c_tr, tau_i=tau_tr, th_i=th_tr))
                 if all(v is not None for v in state.values()):
                     break
             for key in state:
                 if state[key] is None:
-                    state[key] = ("abstain", looks[-1], dict(c_hat=c_hat, tau_i=tau_i))
+                    state[key] = ("abstain", looks[-1], dict(c_hat=c_hat, tau_i=tau_i, th_i=th_i))
             for key, (action, T, pl) in state.items():
                 ev = [H[i] for i in perm[T:]]
                 if key.startswith("recal"):
                     loss = abs(cert.u_gate_at(ev, pl["c_hat"])[0] - float(np.mean([s["f_adc"] for s in ev])))
                     eps = EPS_CAL; picked = "ad_probe"
                 else:
-                    Uev = utils(ev, pl["c_hat"], pl["tau_i"]).mean(axis=0)
+                    Uev = menu_utils(ev, pl["c_hat"], pl["tau_i"], pl.get("th_i", 0)).mean(axis=0)
                     picked = MENU[pl["pick"]] if "pick" in pl else None
                     loss = float(Uev.max() - Uev[pl["pick"]]) if "pick" in pl else None
                     eps = EPS_SEL
