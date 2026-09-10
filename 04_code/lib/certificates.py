@@ -82,6 +82,46 @@ def recal_spread(structs, c_hat, c_lo, c_hi, mode="breakpoints"):
     return float(np.max(np.abs(u - u_hat))), len(grid)
 
 
+def recal_spread_ucb(structs, c_hat, c_lo, c_hi, alpha, rng, boot=200):
+    """Bootstrap upper confidence bound (level 1-alpha) on the *population*
+    sup_{c in [c_lo,c_hi]} |u(c) - u(c_hat)|: resample audited queries, take the
+    sup of the resampled mean-difference curve over the breakpoint grid, and
+    return its (1-alpha) quantile.  Addresses DRAFT v0.3 §4.1 step (ii)."""
+    prepare_gate(structs)
+    bps = np.concatenate([s["_P"] for s in structs])
+    bps = bps[(bps >= c_lo) & (bps <= c_hi) & np.isfinite(bps)]
+    grid = np.unique(np.r_[c_lo, c_hi, bps])
+    T = len(structs)
+    Uq = np.empty((T, len(grid)))
+    for i, s in enumerate(structs):
+        k = np.searchsorted(s["_P"], grid, side="left"); k = np.where(grid <= 0, 0, k)
+        Uq[i] = s["_F"][k]
+        kh = int(np.searchsorted(s["_P"], c_hat, side="left")) if c_hat > 0 else 0
+        Uq[i] -= s["_F"][kh]
+    W = rng.multinomial(T, np.full(T, 1.0 / T), size=boot) / T          # (boot, T)
+    sup = np.abs(W @ Uq).max(axis=1)
+    return float(np.quantile(sup, 1 - alpha)), len(grid)
+
+
+def median_ci_exact(x, alpha):
+    """Distribution-free two-sided (1-alpha) CI for the population median from
+    order statistics (sign-test inversion).  Returns (-inf, inf) when n is too
+    small for the requested level — the planner then cannot certify."""
+    from scipy.stats import binom
+    x = np.sort(np.asarray(x, dtype=float)); n = len(x)
+    if n == 0:
+        return -np.inf, np.inf
+    k = int(binom.ppf(alpha / 2, n, 0.5))          # P(Bin <= k) >= alpha/2 ...
+    while k > 0 and binom.cdf(k - 1, n, 0.5) > alpha / 2:
+        k -= 1
+    # need P(Bin <= k-1) <= alpha/2 with k >= 1
+    while k >= 1 and binom.cdf(k - 1, n, 0.5) > alpha / 2:
+        k -= 1
+    if k < 1:
+        return -np.inf, np.inf
+    return float(x[k - 1]), float(x[n - k])
+
+
 # ----------------------------------------------------------------------------
 # helpers
 # ----------------------------------------------------------------------------

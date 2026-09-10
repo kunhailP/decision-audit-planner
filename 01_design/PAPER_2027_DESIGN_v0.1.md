@@ -181,3 +181,58 @@ modern = legacy에서 msmarco-MiniLM을 Qwen3-Embedding-0.6B로 교체(4-feature
 보정 결정은 modern에서 오히려 어려워지는 경향(android cal ok@10 0.52→0.26).
 한계: 4-feature 분류기가 그대로라 Qwen3 신호는 pool 구성에만 들어갔다. qwen3e_cos를
 feature로 넣은 "fully modern" 변형은 후속.
+
+### 9.5 Planner v2 결과 — 인증서 변형 비교 (`05_results/planner_v2/`, 50회, α=0.1)
+
+방법: `loo_boot`(v0.3 그대로), `loo_sim`(LOO + 모든 순서쌍 동시보정), `split_t`(학습/검증 분리 + t),
+`split_ppi`(split_t + Qwen3-Reranker judge PPI++), 보정은 `recal_ep`(v0.3 끝점), `recal_bp`(breakpoint 전수),
+`recal_bpx`(breakpoint + 정확 median 구간), `recal_bpxu`(+ uniform bootstrap 상한).
+
+**선택 결정 (ACT율 / 잘못된 인증률)**
+
+| stack | collection | loo_boot | loo_sim | split_t | split_ppi |
+|---|---|---|---|---|---|
+| legacy | android | 0.54 / 0.08 | 0.46 / 0.04 | 0.10 / 0.00 | 0.14 / 0.00 |
+| legacy | scifact | 0.74 / 0.08 | 0.70 / 0.06 | 0.12 / 0.00 | 0.14 / 0.02 |
+| legacy | nfcorpus | 0.78 / 0.00 | 0.62 / 0.00 | 0.24 / 0.02 | 0.38 / 0.02 |
+| legacy | arguana | 0.96 / 0.04 | 0.94 / 0.02 | 0.34 / 0.02 | 0.28 / 0.02 |
+| modern | android | 0.72 / **0.12** | 0.62 / 0.08 | 0.12 / 0.02 | 0.12 / 0.02 |
+| modern | scifact | 0.88 / **0.12** | 0.80 / 0.10 | 0.24 / 0.00 | 0.24 / 0.04 |
+| modern | nfcorpus | 0.88 / 0.04 | 0.72 / 0.02 | 0.26 / 0.02 | 0.30 / 0.02 |
+| modern | arguana | 0.88 / 0.04 | 0.82 / 0.04 | 0.28 / 0.00 | 0.32 / 0.00 |
+
+- v0.3 인증서(`loo_boot`)는 modern stack의 두 collection에서 α를 넘는다(0.12, MC SE 0.04).
+  동시보정(`loo_sim`)이 이를 낮추지만 LOO 의존성은 남는다.
+- 유효한 split 인증서는 ACT율이 0.10–0.38로 떨어진다. **v0.3의 효율 일부는 유효성 위반에서 온 것.**
+  이것이 "자료 재사용을 허용하면서 유효한 인증서"가 필요한 실증적 이유다.
+- PPI의 이득은 미미하다. 판정자(reranker≥0.5)의 paired-difference ρ가 0.04–0.27에 불과.
+
+**보정 결정 (ACT율 / 잘못된 인증률)**
+
+| stack | collection | recal_ep (v0.3) | recal_bp | recal_bpx | recal_bpxu |
+|---|---|---|---|---|---|
+| legacy | android | 0.30 / 0.00 | 0.12 / 0.00 | 0.06 / 0.00 | 0.00 / – |
+| legacy | nfcorpus | 0.92 / 0.00 | 0.70 / 0.00 | 0.62 / 0.00 | 0.00 / – |
+| modern | arguana | 0.32 / **0.14** | 0.30 / **0.14** | 0.20 / 0.08 | 0.14 / 0.08 |
+| modern | nfcorpus | 0.80 / 0.00 | 0.48 / 0.00 | 0.44 / 0.00 | 0.00 / – |
+
+- 끝점 검사는 ACT율을 2–5배 부풀린다(android 0.30 vs 0.06). v0.3 P4의 recal ACT 0.44도 같은 이유로 과대.
+- bootstrap median 구간은 T=10에서 실패(arguana modern 오류 0.14 → 정확 구간으로 0.08).
+- 표본 utility 곡선의 불확실성까지 상한(`bpxu`)에 넣으면 ε_cal=0.005는 90건 안에서 거의 인증 불가.
+  → ε_cal 재설정 또는 보정을 보조 결과로 내리는 결정이 필요.
+
+**판정자 진단 (pair 정확도 / 결정 구간 안 오류율 / 밖 오류율)**
+
+| collection | legacy | modern |
+|---|---|---|
+| scifact | 0.91 / 0.27 / 0.09 | 0.90 / 0.28 / 0.10 |
+| arguana | 0.82 / 0.30 / 0.17 | 0.82 / 0.30 / 0.17 |
+| android | 0.61 / 0.70 / 0.38 | 0.56 / 0.75 / 0.43 |
+| nfcorpus | 0.87 / 0.15 / 0.13 | 0.86 / 0.15 / 0.14 |
+
+**판정자 오류는 정책 불일치 구간에 2–3배 집중된다.** 이것이 §2 명제의 첫 실데이터 증거다.
+단, BEIR qrels 구멍이 "오류"에 섞여 있으므로 TREC DL 완전 판정 pool에서 재측정해야 한다(진행 중).
+android에서는 reranker 판정자가 사실상 무작위(0.56–0.61): 중복 질문 관련성은 passage 관련성과 다른 과제.
+
+주의: 방법 변형을 추가하면 rng 소비 순서가 바뀌어 `loo_boot` 수치가 run 간 ±0.04 흔들린다.
+최종 실험에서는 방법별 독립 rng stream을 써야 한다.

@@ -166,22 +166,30 @@ def main():
         for rep in range(a.repeats):
             rng = np.random.default_rng(5_000_000 + 1000 * rep + salt)
             perm = rng.permutation(n)
-            state = {m: None for m in ["recal_bp", "recal_ep", "loo_boot", "split_t", "split_ppi"]}
+            state = {m: None for m in ["recal_bp", "recal_ep", "recal_bpx", "recal_bpu", "recal_bpxu", "loo_boot", "loo_sim", "split_t", "split_ppi"]}
             for T in looks:
                 probe = [H[i] for i in perm[:T]]
                 c_hat, tau_i, ratios = fit_params(probe)
                 # ---- recalibration (full probe) ----
-                if state["recal_bp"] is None or state["recal_ep"] is None:
+                if any(state[k] is None for k in ["recal_bp", "recal_ep", "recal_bpx", "recal_bpu", "recal_bpxu"]):
                     bs = rng.integers(0, len(ratios), (BOOT, len(ratios)))
                     bmed = np.median(ratios[bs], axis=1)
-                    c_lo, c_hi = np.quantile(bmed, [a_look / 2, 1 - a_look / 2])
-                    for key, mode in [("recal_bp", "breakpoints"), ("recal_ep", "endpoints")]:
-                        if state[key] is None:
-                            spread, npts = cert.recal_spread(probe, c_hat, c_lo, c_hi, mode=mode)
+                    c_lo, c_hi = np.quantile(bmed, [a_look / 2, 1 - a_look / 2])      # v0.3 bootstrap CI
+                    x_lo, x_hi = cert.median_ci_exact(ratios, a_look)                 # exact order-stat CI
+                    for key, mode, lo, hi in [("recal_ep", "endpoints", c_lo, c_hi),
+                                              ("recal_bp", "breakpoints", c_lo, c_hi),
+                                              ("recal_bpx", "breakpoints", x_lo, x_hi)]:
+                        if state[key] is None and np.isfinite(lo) and np.isfinite(hi):
+                            spread, npts = cert.recal_spread(probe, c_hat, lo, hi, mode=mode)
+                            if spread <= EPS_CAL:
+                                state[key] = ("act", T, dict(c_hat=c_hat, spread=spread, npts=npts))
+                    for key, lo, hi in [("recal_bpu", c_lo, c_hi), ("recal_bpxu", x_lo, x_hi)]:
+                        if state[key] is None and np.isfinite(lo) and np.isfinite(hi):
+                            spread, npts = cert.recal_spread_ucb(probe, c_hat, lo, hi, a_look, rng)
                             if spread <= EPS_CAL:
                                 state[key] = ("act", T, dict(c_hat=c_hat, spread=spread, npts=npts))
                 # ---- legacy LOO bootstrap ----
-                if state["loo_boot"] is None:
+                if state["loo_boot"] is None or state["loo_sim"] is None:
                     ratios_all = np.array([s["nG"] / s["Sp"] if s["Sp"] > 0 else np.nan for s in probe])
                     F = np.stack([s["f_tau"] for s in probe]); colsum = F.sum(axis=0)
                     U = np.empty((T, len(MENU)))
@@ -192,9 +200,14 @@ def main():
                         U[i, 0] = float(s["f_tau"][int(np.argmax(colsum - F[i]))])
                         U[i, 1] = s["f_trunc"]
                     cand = cert.pick_candidate(U)
-                    ucb = cert.ucb_bootstrap(U, cand, a_sel_legacy, rng, BOOT)
-                    if ucb.max() <= EPS_SEL:
-                        state["loo_boot"] = ("act", T, dict(pick=cand, c_hat=c_hat, tau_i=tau_i))
+                    if state["loo_boot"] is None:
+                        ucb = cert.ucb_bootstrap(U, cand, a_sel_legacy, rng, BOOT)
+                        if ucb.max() <= EPS_SEL:
+                            state["loo_boot"] = ("act", T, dict(pick=cand, c_hat=c_hat, tau_i=tau_i))
+                    if state["loo_sim"] is None:
+                        ucb = cert.ucb_bootstrap(U, cand, a_sel_sim, rng, BOOT)
+                        if ucb.max() <= EPS_SEL:
+                            state["loo_sim"] = ("act", T, dict(pick=cand, c_hat=c_hat, tau_i=tau_i))
                 # ---- split designs ----
                 if state["split_t"] is None or state["split_ppi"] is None:
                     ntr = T // 2
