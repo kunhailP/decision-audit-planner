@@ -95,6 +95,31 @@ for f in glob.glob(os.path.join(R, "f1_weighted", "f1_weighted_*.csv")):
             rows.append(dict(block="D doc-level, set-F1 (linearised; see caveat)", collection=c, judge=jname.get(j, j) if m not in ("human_full", "weighted_plugin") else "—",
                              method=m, eps=e, J50_docs=j50, J50_queries=np.nan, wrong_rate=float(s_.wrong.max()), n=300,
                              max_budget_docs=float(docs.max()), max_act=float(s_.act.max())))
+# ---------- Block E: confirmatory collections, document-level precision (locked + post-hoc budgets for CAsT) ----------
+def add_conf(stack, coll, label):
+    frames = []
+    for f in glob.glob(os.path.join(R, "sampling_baselines", f"baselines_{stack}_*.csv")):
+        if "boundary" in f or "forceworst" in f:
+            continue
+        d = pd.read_csv(f); d["src"] = os.path.basename(f); frames.append(d)
+    for f in glob.glob(os.path.join(R, "active_inference", f"active_{stack}_llm*.csv")):
+        if "boundary" in f:
+            continue
+        d = pd.read_csv(f); d["src"] = os.path.basename(f); frames.append(d)
+    if not frames:
+        return
+    d = pd.concat(frames); d = d[d.collection == coll]
+    ai = d[d.src.str.startswith("active_")]
+    cv = float((ai.docs_labelled / ai.budget_full_eq).mean()) if len(ai) and "docs_labelled" in ai else np.nan
+    for (j, e), g in d.groupby(["judge", "eps"]):
+        for m in sorted(g.method.unique()):
+            s_ = g[g.method == m].groupby("budget_full_eq", as_index=False).agg(act=("act", "mean"), wrong=("wrong", "max")).sort_values("budget_full_eq")
+            docs = s_.budget_full_eq.values * cv; j50v = interp_first(docs, s_.act.values)
+            judge = jname.get(j, j) if (m.endswith("_cv") or m.endswith("_cvl") or m.startswith("ai_") or m == "active_judge") else "—"
+            rows.append(dict(block=label, collection=coll, judge=judge, method=m, eps=e, J50_docs=j50v, J50_queries=np.nan,
+                             wrong_rate=float(s_.wrong.max()), n=300, max_budget_docs=float(np.nanmax(docs)), max_act=float(s_.act.max())))
+add_conf("cast", "cast19", "E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc")
+add_conf("antique", "antique", "F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision")
 df = pd.DataFrame(rows).drop_duplicates(subset=["block", "collection", "judge", "method", "eps"]); df.to_csv(os.path.join(OUT, "J50.csv"), index=False)
 
 # ---------- manuscript table ----------

@@ -1,0 +1,24 @@
+\begin{table}[t]\centering\small
+\caption{Confirmatory collections, document-level precision at cutoff, $\eps=0.02$: $\Jfifty$ (human-judged pairs to 50\% $\ACT$) by judge. CAsT rows use the locked grid plus the post-hoc budgets 120/150; ANTIQUE rows are fully pre-registered. ``n.r.''\ = not reached; wrong-certificate rate $\le0.003$ in every cell.}\label{tab:conf}
+\begin{tabular}{llrrrr}\toprule
+Collection & Method & humans & Qwen3-8B & Reranker & inverted\\\midrule
+TREC CAsT 2019 & Uniform document sampling (humans) & n.r. & n.r. & n.r. & n.r.\\
+ & Decision-weight importance sampling (humans) & 2,784 & n.r. & n.r. & n.r.\\
+ & Stratified by pilot variance (humans) & 2,947 & n.r. & n.r. & n.r.\\
+ & Active inference, calibrated-judge rule + CV & n.r. & 2,731 & n.r. & n.r.\\
+ & Active inference, residual-estimated rule + CV & n.r. & 2,807 & n.r. & n.r.\\
+ & Active inference, robust mixture + CV & n.r. & 2,779 & n.r. & n.r.\\
+ & Decision-weight sampling + judge CV (coefficient 1) & n.r. & 2,694 & 2,924 & 3,275\\
+ & Decision-weight sampling + judge CV (pilot $\lambda$) & n.r. & 2,610 & 2,686 & 2,719\\
+\midrule
+ANTIQUE & Uniform document sampling (humans) & 1,555 & n.r. & n.r. & n.r.\\
+ & Decision-weight importance sampling (humans) & 776 & n.r. & n.r. & n.r.\\
+ & Stratified by pilot variance (humans) & 747 & n.r. & n.r. & n.r.\\
+ & Active inference, calibrated-judge rule + CV & n.r. & 738 & n.r. & n.r.\\
+ & Active inference, residual-estimated rule + CV & n.r. & 598 & n.r. & n.r.\\
+ & Active inference, robust mixture + CV & n.r. & 602 & n.r. & n.r.\\
+ & Decision-weight sampling + judge CV (coefficient 1) & n.r. & 581 & 687 & 826\\
+ & Decision-weight sampling + judge CV (pilot $\lambda$) & n.r. & 576 & 627 & 733\\
+\bottomrule
+\end{tabular}
+\end{table}

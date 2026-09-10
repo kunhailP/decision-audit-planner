@@ -144,7 +144,10 @@ Three readings follow. First, the large saving is obtained without any judge: de
 \paragraph{Judges.} Qwen3-Reranker-0.6B (probability of ``yes''), Qwen3-8B and Mistral-7B-Instruct-v0.3 with the UMBRELA 0--3 prompt \citep{upadhyay2024umbrela} read from the next-token distribution over the digit tokens, an MPNet cosine rank rule (label-free, different family), and the inverted reranker as an adversarial control. Batched inference with left padding requires explicit position ids; without them one collection's judgments collapsed, which we detected and re-ran (Appendix~\ref{app:repro}).
 \paragraph{Repeats and randomness.} 500 repeats for sequential certificates and 300 draws for fixed-budget designs; every method has its own random stream so adding a method never perturbs another's numbers; all seeds are recorded.
 
-\section{Pre-registered external evaluation}\label{sec:prereg}
+\section{Pre-registered external evaluations}\label{sec:prereg}
+Table~\ref{tab:locks} summarises the three locks; the subsections give the details, and Table~\ref{tab:conf} reports the confirmatory $\Jfifty$ values.
+\input{table_locks}
+\input{table_conf}
 Before downloading TREC DL 2021--2023, we committed a lock fixing the target, pooling rule, training data, $\eps=0.01$, $\alpha=0.10$, the look grid, the three methods (humans only, always-PPI, rule-based adoption), the judge, 500 repeats, and three criteria: validity (Clopper--Pearson upper limit of the wrong-certificate rate $\le0.15$ and point estimate $\le\alpha$ for all three methods), efficiency (always-PPI $\ge1.2\times$ humans-only in cumulative $\ACT$ at the largest look; rule-based $\ge$ humans-only), and adversarial rejection (the rule adopts the inverted judge in $\le5\%$ of runs). The pool has 211 queries, so looks are capped at $T=90$.
 
 \begin{table}[t]\centering\small

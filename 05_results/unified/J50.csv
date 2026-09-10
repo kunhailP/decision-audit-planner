@@ -49,6 +49,49 @@ block,collection,judge,method,eps,J50_docs,J50_queries,wrong_rate,n,max_budget_d
 "B doc-level, precision",dbpedia-entity,—,weighted,0.0169009546669507,,,0.0,300,2572.807653333333,0.0
 "B doc-level, precision",dbpedia-entity,—,strat_pilot,0.0169009546669507,,,0.0,300,2572.807653333333,0.0
 "B doc-level, precision",dbpedia-entity,Qwen3-8B,weighted_cv,0.0169009546669507,,,0.0,300,2572.807653333333,0.0
+"B doc-level, precision",cast19,—,uniform,0.0008227621787554,,,0.0133333333333333,300,1432.0833333333335,0.0133333333333333
+"B doc-level, precision",cast19,—,weighted,0.0008227621787554,,,0.0,300,1432.0833333333335,0.0
+"B doc-level, precision",cast19,—,strat_pilot,0.0008227621787554,,,0.0,300,1432.0833333333335,0.0
+"B doc-level, precision",cast19,Qwen3-8B,weighted_cv,0.0008227621787554,,,0.0,300,1432.0833333333335,0.0
+"B doc-level, precision",cast19,—,uniform,0.0096547546723192,,,0.0033333333333333,300,2148.125,0.0033333333333333
+"B doc-level, precision",cast19,—,weighted,0.0096547546723192,,,0.0,300,2148.125,0.0
+"B doc-level, precision",cast19,—,strat_pilot,0.0096547546723192,,,0.0,300,2148.125,0.0
+"B doc-level, precision",cast19,Qwen3-8B,weighted_cv,0.0096547546723192,,,0.0,300,2148.125,0.0
+"B doc-level, precision",cast19,—,uniform,0.02,,,0.0,300,3580.2083333333335,0.23
+"B doc-level, precision",cast19,—,weighted,0.02,2864.166666666667,,0.0,300,3580.2083333333335,0.53
+"B doc-level, precision",cast19,—,strat_pilot,0.02,3052.598684210527,,0.0,300,3580.2083333333335,0.5466666666666666
+"B doc-level, precision",cast19,Qwen3-8B,weighted_cv,0.02,2864.166666666667,,0.0,300,3580.2083333333335,0.5366666666666666
+"B doc-level, precision",cast19,—,uniform,0.01,,,0.003,300,2148.125,0.05
+"B doc-level, precision",cast19,—,weighted,0.01,,,0.003,300,2148.125,0.19
+"B doc-level, precision",cast19,—,strat_pilot,0.01,,,0.003,300,2148.125,0.16
+"B doc-level, precision",cast19,Qwen3-8B,weighted_cv,0.01,,,0.003,300,2148.125,0.17
+"B doc-level, precision",cast19,Qwen3-Reranker,weighted_cv,0.02,2864.166666666667,,0.0,300,3580.2083333333335,0.53
+"B doc-level, precision",cast19,Qwen3-Reranker,weighted_cv,0.01,,,0.003,300,2148.125,0.16
+"B doc-level, precision",cast19,inverted,weighted_cv,0.02,3257.9895833333335,,0.0,300,3580.2083333333335,0.53
+"B doc-level, precision",cast19,inverted,weighted_cv,0.01,,,0.003,300,2148.125,0.2
+"B doc-level, precision",dbpedia-entity,inverted,weighted_cv,0.02,2395.37264275862,,0.0,300,2572.807653333333,0.54
+"B doc-level, precision",antique,—,uniform,0.0531081341613336,,,0.01,300,1152.5377444444446,0.01
+"B doc-level, precision",antique,—,weighted,0.0531081341613336,,,0.0033333333333333,300,1152.5377444444446,0.0033333333333333
+"B doc-level, precision",antique,—,strat_pilot,0.0531081341613336,,,0.0,300,1152.5377444444446,0.0
+"B doc-level, precision",antique,inverted,weighted_cv,0.0531081341613336,,,0.0066666666666666,300,1152.5377444444446,0.0066666666666666
+"B doc-level, precision",antique,—,uniform,0.0539783873777967,,,0.01,300,1728.8066166666667,0.01
+"B doc-level, precision",antique,—,weighted,0.0539783873777967,,,0.0,300,1728.8066166666667,0.0
+"B doc-level, precision",antique,—,strat_pilot,0.0539783873777967,,,0.0,300,1728.8066166666667,0.0
+"B doc-level, precision",antique,inverted,weighted_cv,0.0539783873777967,,,0.0,300,1728.8066166666667,0.0
+"B doc-level, precision",antique,Qwen3-8B,weighted_cv,0.0531081341613336,,,0.0033333333333333,300,1152.5377444444446,0.0033333333333333
+"B doc-level, precision",antique,Qwen3-8B,weighted_cv,0.0539783873777967,,,0.0,300,1728.8066166666667,0.0
+"B doc-level, precision",antique,—,uniform,0.01,1728.8066166666667,,0.0,300,2881.3443611111115,0.8133333333333334
+"B doc-level, precision",antique,—,weighted,0.01,827.0801948474382,,0.0,300,2881.3443611111115,0.9366666666666666
+"B doc-level, precision",antique,—,strat_pilot,0.01,841.9928521913581,,0.0,300,2881.3443611111115,0.9433333333333334
+"B doc-level, precision",antique,inverted,weighted_cv,0.01,894.7332489766084,,0.0,300,2881.3443611111115,0.9366666666666666
+"B doc-level, precision",antique,—,uniform,0.02,1555.306311051374,,0.0,300,2881.3443611111115,0.9166666666666666
+"B doc-level, precision",antique,—,weighted,0.02,776.4464804678364,,0.0,300,2881.3443611111115,0.96
+"B doc-level, precision",antique,—,strat_pilot,0.02,747.1392936369509,,0.0,300,2881.3443611111115,0.96
+"B doc-level, precision",antique,inverted,weighted_cv,0.02,825.7873529782361,,0.0,300,2881.3443611111115,0.9633333333333334
+"B doc-level, precision",antique,Qwen3-Reranker,weighted_cv,0.01,761.6185094866798,,0.0,300,2881.3443611111115,0.9366666666666666
+"B doc-level, precision",antique,Qwen3-Reranker,weighted_cv,0.02,687.3568475903616,,0.0,300,2881.3443611111115,0.9633333333333334
+"B doc-level, precision",antique,Qwen3-8B,weighted_cv,0.01,713.132729375,,0.0,300,2881.3443611111115,0.95
+"B doc-level, precision",antique,Qwen3-8B,weighted_cv,0.02,576.2688722222223,,0.0,300,2881.3443611111115,0.96
 "B doc-level, precision",dl212223,Qwen3-8B,ai_calib,0.01,1785.8918655010893,,0.0,300,3631.115686666667,0.8733333333333333
 "B doc-level, precision",dl212223,Qwen3-8B,ai_resid,0.01,1532.1771217548503,,0.0,300,3631.115686666667,0.88
 "B doc-level, precision",dl212223,Qwen3-8B,ai_robust_0.5,0.01,1569.0006053497946,,0.0,300,3631.115686666667,0.8766666666666667
@@ -67,6 +110,24 @@ block,collection,judge,method,eps,J50_docs,J50_queries,wrong_rate,n,max_budget_d
 "B doc-level, precision",dbpedia-entity,Qwen3-Reranker,ai_calib,0.02,2053.7324250292395,,0.0,300,2572.807653333333,0.6033333333333334
 "B doc-level, precision",dbpedia-entity,Qwen3-Reranker,ai_resid,0.02,1715.2051022222217,,0.0,300,2572.807653333333,0.6533333333333333
 "B doc-level, precision",dbpedia-entity,Qwen3-Reranker,ai_robust_0.5,0.02,1628.1048431249997,,0.0,300,2572.807653333333,0.64
+"B doc-level, precision",cast19,Qwen3-8B,ai_calib,0.0059889004171976,,,0.0,300,1432.0833333333335,0.0
+"B doc-level, precision",cast19,Qwen3-8B,ai_resid,0.0059889004171976,,,0.0,300,1432.0833333333335,0.0
+"B doc-level, precision",cast19,Qwen3-8B,ai_robust_0.5,0.0059889004171976,,,0.0,300,1432.0833333333335,0.0
+"B doc-level, precision",cast19,Qwen3-8B,ai_calib,0.0164113016153984,,,0.0,300,2148.125,0.0
+"B doc-level, precision",cast19,Qwen3-8B,ai_resid,0.0164113016153984,,,0.0,300,2148.125,0.0
+"B doc-level, precision",cast19,Qwen3-8B,ai_robust_0.5,0.0164113016153984,,,0.0,300,2148.125,0.0
+"B doc-level, precision",cast19,Qwen3-8B,ai_calib,0.02,2864.166666666667,,0.0,300,3580.2083333333335,0.5333333333333333
+"B doc-level, precision",cast19,Qwen3-8B,ai_resid,0.02,2864.166666666667,,0.0,300,3580.2083333333335,0.52
+"B doc-level, precision",cast19,Qwen3-8B,ai_robust_0.5,0.02,2864.166666666667,,0.0,300,3580.2083333333335,0.5233333333333333
+"B doc-level, precision",cast19,Qwen3-8B,ai_calib,0.01,,,0.0,300,2148.125,0.2
+"B doc-level, precision",cast19,Qwen3-8B,ai_resid,0.01,,,0.0,300,2148.125,0.23
+"B doc-level, precision",cast19,Qwen3-8B,ai_robust_0.5,0.01,,,0.0,300,2148.125,0.22
+"B doc-level, precision",antique,Qwen3-8B,ai_calib,0.01,763.7298306559572,,0.0,300,2881.3443611111115,0.9433333333333334
+"B doc-level, precision",antique,Qwen3-8B,ai_resid,0.01,657.3733801646092,,0.0,300,2881.3443611111115,0.95
+"B doc-level, precision",antique,Qwen3-8B,ai_robust_0.5,0.01,655.0394374900081,,0.0,300,2881.3443611111115,0.9466666666666668
+"B doc-level, precision",antique,Qwen3-8B,ai_calib,0.02,738.4523272787759,,0.0,300,2881.3443611111115,0.95
+"B doc-level, precision",antique,Qwen3-8B,ai_resid,0.02,597.9331155388472,,0.0,300,2881.3443611111115,0.9466666666666668
+"B doc-level, precision",antique,Qwen3-8B,ai_robust_0.5,0.02,602.2659642021722,,0.0,300,2881.3443611111115,0.9433333333333334
 "C 4-policy menu, precision",dbpedia-entity,Qwen3-8B,static_sum,0.01,2519.207493888889,,0.0,300,2572.807653333333,0.5033333333333333
 "C 4-policy menu, precision",dbpedia-entity,Qwen3-8B,per_pair,0.01,,,0.0,300,2572.807653333333,0.4233333333333333
 "C 4-policy menu, precision",dbpedia-entity,Qwen3-8B,adaptive,0.01,2522.3604444444445,,0.0,300,2572.807653333333,0.5033333333333333
@@ -117,3 +178,76 @@ block,collection,judge,method,eps,J50_docs,J50_queries,wrong_rate,n,max_budget_d
 "D doc-level, set-F1 (linearised; see caveat)",dbpedia-entity,Qwen3-Reranker,judge_ppi,0.02,3471.09022556391,,0.0,300,6170.827067669173,0.8066666666666666
 "D doc-level, set-F1 (linearised; see caveat)",dbpedia-entity,Qwen3-Reranker,weighted_lin_cv,0.02,1633.454223794781,,0.0,300,6170.827067669173,0.8733333333333333
 "D doc-level, set-F1 (linearised; see caveat)",dbpedia-entity,Qwen3-Reranker,weighted_lin_cv_bc,0.02,2875.725235418644,,0.0,300,6170.827067669173,0.6733333333333333
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,inverted,active_cv,0.01,,,0.003,300,2105.1223649999997,0.11
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,inverted,active_judge,0.01,,,0.003,300,2105.1223649999997,0.08
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,—,strat_pilot,0.01,,,0.003,300,2105.1223649999997,0.16
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,—,uniform,0.01,,,0.003,300,2105.1223649999997,0.05
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,—,weighted,0.01,,,0.003,300,2105.1223649999997,0.19
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,inverted,weighted_cv,0.01,,,0.003,300,2105.1223649999997,0.2
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,inverted,active_cv,0.02,,,0.0,300,3508.5372749999997,0.49333333333333335
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,inverted,active_judge,0.02,,,0.0,300,3508.5372749999997,0.48999999999999994
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,—,strat_pilot,0.02,2947.171311,,0.0,300,3508.5372749999997,0.5333333333333333
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,—,uniform,0.02,,,0.0,300,3508.5372749999997,0.225
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,—,weighted,0.02,2784.1940956451617,,0.0,300,3508.5372749999997,0.5216666666666667
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,inverted,weighted_cv,0.02,3274.634789999999,,0.0,300,3508.5372749999997,0.5216666666666667
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,inverted,weighted_cvl,0.02,2719.116388125,,0.0,300,3508.5372749999997,0.5133333333333333
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,active_cv,0.01,,,0.003,300,2105.1223649999997,0.17
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,active_judge,0.01,,,0.003,300,2105.1223649999997,0.13
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,ai_calib,0.01,,,0.0,300,2105.1223649999997,0.2
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,ai_resid,0.01,,,0.0,300,2105.1223649999997,0.23
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,ai_robust_0.3,0.01,,,0.0,300,2105.1223649999997,0.21
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,ai_robust_0.5,0.01,,,0.0,300,2105.1223649999997,0.22
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,weighted_cv,0.01,,,0.003,300,2105.1223649999997,0.185
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,active_cv,0.02,2760.816216393443,,0.003,300,3508.5372749999997,0.5333333333333333
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,active_judge,0.02,3314.9628046551725,,0.003,300,3508.5372749999997,0.5133333333333333
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,ai_calib,0.02,2730.9695545945947,,0.0,300,3508.5372749999997,0.5333333333333333
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,ai_resid,0.02,2806.82982,,0.0,300,3508.5372749999997,0.52
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,ai_robust_0.3,0.02,2806.82982,,0.0,300,3508.5372749999997,0.53
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,ai_robust_0.5,0.02,2778.7615218,,0.0,300,3508.5372749999997,0.5233333333333333
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,weighted_cv,0.02,2694.2101050000006,,0.003,300,3508.5372749999997,0.5333333333333333
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-8B,weighted_cvl,0.02,2610.3517326,,0.0,300,3508.5372749999997,0.5233333333333333
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-Reranker,active_cv,0.01,,,0.003,300,2105.1223649999997,0.16
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-Reranker,active_judge,0.01,,,0.003,300,2105.1223649999997,0.08
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-Reranker,weighted_cv,0.01,,,0.003,300,2105.1223649999997,0.16
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-Reranker,active_cv,0.02,3207.805508571428,,0.0,300,3508.5372749999997,0.52
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-Reranker,active_judge,0.02,,,0.0,300,3508.5372749999997,0.48999999999999994
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-Reranker,weighted_cv,0.02,2923.7810624999997,,0.0,300,3508.5372749999997,0.525
+"E confirmatory (LOCK v0.5) — TREC CAsT 2019, doc-level precision; budgets 120/150 are post-hoc",cast19,Qwen3-Reranker,weighted_cvl,0.02,2685.8457760344822,,0.0,300,3508.5372749999997,0.5166666666666667
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,inverted,active_cv,0.01,1462.4638605975724,,0.0,300,2881.3443611111115,0.9233333333333332
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,inverted,active_judge,0.01,1344.6273685185188,,0.0,300,2881.3443611111115,0.9333333333333332
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,—,strat_pilot,0.01,841.9928521913581,,0.0,300,2881.3443611111115,0.9433333333333334
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,—,uniform,0.01,1728.8066166666667,,0.0,300,2881.3443611111115,0.8133333333333334
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,—,weighted,0.01,827.0801948474382,,0.0,300,2881.3443611111115,0.9366666666666666
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,inverted,weighted_cv,0.01,894.7332489766084,,0.0,300,2881.3443611111115,0.9366666666666666
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,inverted,weighted_cvl,0.01,843.7085698281155,,0.0,300,2881.3443611111115,0.94
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,inverted,active_cv,0.02,1325.4184061111112,,0.0,300,2881.3443611111115,0.9633333333333334
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,inverted,active_judge,0.02,1136.304818466354,,0.0,300,2881.3443611111115,0.9566666666666668
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,—,strat_pilot,0.02,747.1392936369509,,0.0,300,2881.3443611111115,0.96
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,—,uniform,0.02,1555.306311051374,,0.0,300,2881.3443611111115,0.9166666666666666
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,—,weighted,0.02,776.4464804678364,,0.0,300,2881.3443611111115,0.96
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,inverted,weighted_cv,0.02,825.7873529782361,,0.0,300,2881.3443611111115,0.9633333333333334
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,inverted,weighted_cvl,0.02,732.5451765536724,,0.0,300,2881.3443611111115,0.96
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,active_cv,0.01,866.1286642381904,,0.0,300,2881.3443611111115,0.9433333333333334
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,active_judge,0.01,1197.2482603927206,,0.0,300,2881.3443611111115,0.9366666666666666
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,ai_calib,0.01,763.7298306559572,,0.0,300,2881.3443611111115,0.9433333333333334
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,ai_resid,0.01,657.3733801646092,,0.0,300,2881.3443611111115,0.95
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,ai_robust_0.3,0.01,648.3024812500001,,0.0,300,2881.3443611111115,0.95
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,ai_robust_0.5,0.01,655.0394374900081,,0.0,300,2881.3443611111115,0.9466666666666668
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,weighted_cv,0.01,701.2203752606977,,0.0,300,2881.3443611111115,0.9483333333333334
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,weighted_cvl,0.01,740.3960826652603,,0.0,300,2881.3443611111115,0.94
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,active_cv,0.02,796.4165312734083,,0.0,300,2881.3443611111115,0.9633333333333334
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,active_judge,0.02,1114.402304370915,,0.0,300,2881.3443611111115,0.9566666666666668
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,ai_calib,0.02,738.4523272787759,,0.0,300,2881.3443611111115,0.95
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,ai_resid,0.02,597.9331155388472,,0.0,300,2881.3443611111115,0.9466666666666668
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,ai_robust_0.3,0.02,576.2688722222223,,0.0,300,2881.3443611111115,0.95
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,ai_robust_0.5,0.02,602.2659642021722,,0.0,300,2881.3443611111115,0.9433333333333334
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,weighted_cv,0.02,580.5854929879318,,0.0,300,2881.3443611111115,0.95
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-8B,weighted_cvl,0.02,576.2688722222223,,0.0,300,2881.3443611111115,0.9633333333333334
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-Reranker,active_cv,0.01,911.2251542013889,,0.0,300,2881.3443611111115,0.94
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-Reranker,active_judge,0.01,1344.6273685185188,,0.0,300,2881.3443611111115,0.9333333333333332
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-Reranker,weighted_cv,0.01,761.6185094866798,,0.0,300,2881.3443611111115,0.9366666666666666
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-Reranker,weighted_cvl,0.01,747.0152047325104,,0.0,300,2881.3443611111115,0.9466666666666668
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-Reranker,active_cv,0.02,849.0770085401892,,0.0,300,2881.3443611111115,0.9633333333333334
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-Reranker,active_judge,0.02,1136.304818466354,,0.0,300,2881.3443611111115,0.9566666666666668
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-Reranker,weighted_cv,0.02,687.3568475903616,,0.0,300,2881.3443611111115,0.9633333333333334
+"F confirmatory (LOCK v0.6) — ANTIQUE, doc-level precision",antique,Qwen3-Reranker,weighted_cvl,0.02,626.5473644295304,,0.0,300,2881.3443611111115,0.9633333333333334

@@ -1,0 +1,9 @@
+\begin{table}[t]\centering\small
+\caption{The three pre-registered evaluations. Every criterion was fixed in a lock committed before the target data were analysed; outcomes are reported as written.}\label{tab:locks}
+\begin{tabular}{p{2.4cm}p{3.2cm}p{4.6cm}p{4.6cm}}\toprule
+Lock / target & What was tested & Validity & Efficiency criteria\\\midrule
+v0.4 / TREC DL 2021--23 (211 q) & query-level certificates: humans, always-PPI, rule-based; judges 8B, reranker, inverted & \textbf{pass}: $0/500$ wrong for all methods and judges; rule adopted the inverted judge in $0\%$ & \textbf{not met}: always-PPI $318$ vs $313$ ($1.02\times$, needed $1.2\times$); rule $308$. Cause: $\rho\le0.5$, unlabeled pool $121$, easy gaps (Fig.~\ref{fig:F6})\\
+v0.5 / TREC CAsT 2019 (159 turns) & document-level: weighted sampling, judge CV, active inference & \textbf{pass}: boundary type-I $\le0.013$; judge CV never worse (max-$\ACT$ rule) & \textbf{not evaluable}: no arm reached 50\% $\ACT$ within the locked grid (best $0.43$); ordering replicated; post-hoc grid: $\Jfifty$ $2{,}750$ vs uniform n.r.\\
+v0.6 / ANTIQUE (200 q) & $\lambda$-corrected CV; always-defined criteria & \textbf{pass}: boundary type-I $\le0.010$; $\lambda$-CV never worse for 3 judges; defect fix confirmed; active rule $=$ CV & \textbf{not met} on the max-budget criterion (saturated: $0.96$ vs $0.92$); co-registered $\Jfifty$ $776$ vs $1{,}555$ (pass); judge $-26\%$\\\bottomrule
+\end{tabular}
+\end{table}
