@@ -31,6 +31,7 @@ def main():
     ap.add_argument("--names", nargs="+", required=True); ap.add_argument("--judge", default="rr")
     ap.add_argument("--pilots", nargs="+", type=int, default=[10, 20, 30]); ap.add_argument("--draws", type=int, default=300)
     ap.add_argument("--train_dir", default=None); ap.add_argument("--train_names", nargs="+", default=["nfcorpus", "scifact", "arguana", "cqadupstack-android"])
+    ap.add_argument("--method", default="bca", choices=["fisher", "boot", "bca"])
     a = ap.parse_args()
     pv.NAMES = a.names; pv.JUDGE = a.judge
     data = pv.load_with_judge(os.path.join(a.pools, a.stack, "runs", "candidates"))
@@ -52,7 +53,7 @@ def main():
                     use, cover, ratio, tp, th = [], [], [], [], []
                     for _ in range(a.draws):
                         idx = rng.choice(N, n0, replace=False)
-                        r = nt.diagnose(d[idx], dh[idx], EPS, ALPHA, N_unlabeled=N)
+                        r = nt.diagnose(d[idx], dh[idx], EPS, ALPHA, N_unlabeled=N, rng=rng, method=a.method)
                         use.append(r["use_judge"]); cover.append(r["gain_lcb"] <= true_gain + 1e-9)
                         if np.isfinite(r["T_ppi"]) and r["T_human"] > 0:
                             ratio.append(r["T_ppi"] / r["T_human"]); tp.append(r["T_ppi"]); th.append(r["T_human"])
@@ -63,7 +64,7 @@ def main():
                                      med_T_ppi=float(np.median(tp)) if tp else float("nan")))
     import pandas as pd
     df = pd.DataFrame(rows); out = os.path.join(HUB, "05_results", "neutrality"); os.makedirs(out, exist_ok=True)
-    df.to_csv(os.path.join(out, f"neutrality_{a.stack}_{a.judge}.csv"), index=False)
+    df.to_csv(os.path.join(out, f"neutrality_{a.stack}_{a.judge}_{a.method}.csv"), index=False)
     pd.set_option("display.width", 250); print(df.round(3).to_string(index=False))
 
 

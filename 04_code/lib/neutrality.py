@@ -56,6 +56,38 @@ def rho_lcb_boot(d, dh, alpha, rng=None, boot=1000):
     return r, float(np.quantile(rb, alpha))
 
 
+def _corr_rows(D, Dh):
+    Dc, Dhc = D - D.mean(1, keepdims=True), Dh - Dh.mean(1, keepdims=True)
+    den = np.sqrt((Dc ** 2).sum(1) * (Dhc ** 2).sum(1))
+    return np.where(den > 0, (Dc * Dhc).sum(1) / np.maximum(den, 1e-12), 0.0)
+
+
+def rho_lcb_bca(d, dh, alpha, rng=None, boot=1000):
+    """BCa bootstrap lower bound on rho (bias-corrected, jackknife-accelerated)."""
+    n = len(d)
+    if n < 6 or d.std() == 0 or dh.std() == 0:
+        return float("nan"), -1.0
+    rng = np.random.default_rng(0) if rng is None else rng
+    r = float(np.corrcoef(d, dh)[0, 1])
+    idx = rng.integers(0, n, (boot, n))
+    rb = _corr_rows(d[idx], dh[idx])
+    # bias correction
+    p0 = float(np.clip((rb < r).mean(), 1e-6, 1 - 1e-6))
+    z0 = _z(p0)
+    # jackknife acceleration
+    jk = np.empty(n)
+    mask = ~np.eye(n, dtype=bool)
+    for i in range(n):
+        jk[i] = np.corrcoef(d[mask[i]], dh[mask[i]])[0, 1] if d[mask[i]].std() > 0 and dh[mask[i]].std() > 0 else r
+    jm = jk.mean(); num = ((jm - jk) ** 3).sum(); den = 6.0 * (((jm - jk) ** 2).sum() ** 1.5)
+    a = num / den if den > 0 else 0.0
+    za = _z(alpha)
+    adj = z0 + (z0 + za) / max(1 - a * (z0 + za), 1e-6)
+    q = 0.5 * (1 + math.erf(adj / math.sqrt(2)))
+    q = float(np.clip(q, 1e-4, 1 - 1e-4))
+    return r, float(np.quantile(rb, q))
+
+
 def crossfit_lambda(d, dh, rng=None):
     """Cross-fitted PPI++ tuning: lambda for each half estimated on the other."""
     n = len(d)
@@ -97,8 +129,13 @@ def band_test(err_in, n_in, err_out, n_out):
     return float(zst), float(pval)
 
 
-def diagnose(d, dh, eps, alpha, N_unlabeled=np.inf, band=None, rng=None, method="boot"):
-    r, lcb = rho_lcb_boot(d, dh, alpha, rng) if method == "boot" else rho_lcb(d, dh, alpha)
+def diagnose(d, dh, eps, alpha, N_unlabeled=np.inf, band=None, rng=None, method="bca"):
+    if method == "bca":
+        r, lcb = rho_lcb_bca(d, dh, alpha, rng)
+    elif method == "boot":
+        r, lcb = rho_lcb_boot(d, dh, alpha, rng)
+    else:
+        r, lcb = rho_lcb(d, dh, alpha)
     gain_lcb = 1.0 / (1 - lcb ** 2) if lcb > 0 else 1.0
     T_h, T_p, lam = budget_projection(d, dh, eps, alpha, N_unlabeled, rng)
     out = dict(n_pilot=len(d), rho_hat=r, rho_lcb=lcb, gain_lcb=gain_lcb, T_human=T_h, T_ppi=T_p, lam=lam,
@@ -124,18 +161,19 @@ def _selftest():
             print(f"[INFO] rho={rho_true} n0={n0}: P(lcb > rho) = {miss/2000:.3f} (nominal 0.10)")
             assert miss / 2000 <= 0.13
     # zero-inflated, skewed paired differences (set-F1 like): Fisher-z vs bootstrap LCB coverage
-    for rho_target in [0.0, 0.5]:
+    for rho_target in [0.0, 0.5, 0.9]:
         x = rng.normal(size=N); e = rng.normal(size=N)
         d = np.where(rng.random(N) < 0.6, 0.0, 0.2 * np.exp(0.5 * x))
         dh = np.where(rng.random(N) < 0.6, 0.0, 0.2 * np.exp(0.5 * (rho_target * x + math.sqrt(1 - rho_target ** 2) * e)))
         rho_pop = float(np.corrcoef(d, dh)[0, 1])
         for n0 in [10, 30]:
-            mf = mb = 0
+            mf = mb = mc = 0
             for _ in range(1000):
                 idx = rng.choice(N, n0, replace=False)
                 mf += rho_lcb(d[idx], dh[idx], 0.1)[1] > rho_pop
                 mb += rho_lcb_boot(d[idx], dh[idx], 0.1, rng, boot=400)[1] > rho_pop
-            print(f"[INFO] zero-inflated rho_pop={rho_pop:.2f} n0={n0}: miss fisher={mf/1000:.3f} boot={mb/1000:.3f} (nominal 0.10)")
+                mc += rho_lcb_bca(d[idx], dh[idx], 0.1, rng, boot=400)[1] > rho_pop
+            print(f"[INFO] zero-inflated rho_pop={rho_pop:.2f} n0={n0}: miss fisher={mf/1000:.3f} boot={mb/1000:.3f} bca={mc/1000:.3f} (nominal 0.10)")
     # budget projection sanity: PPI projection <= human projection, ratio ~ 1-rho^2
     x = rng.normal(size=N); e = rng.normal(size=N); d = 0.02 + 0.1 * x; dh = 0.1 * (0.8 * x + 0.6 * e)
     idx = rng.choice(N, 40, replace=False)
