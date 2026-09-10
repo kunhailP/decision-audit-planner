@@ -35,6 +35,9 @@ MENU = ["glob_probe", "trunc", "ad_probe"]
 JUDGE_THR = 0.5
 
 
+JUDGE = "rr"   # "rr" = Qwen3-Reranker P(yes) column; "llm" = <name>_llm.csv side file (llm_p_rel)
+
+
 def load_with_judge(cand_dir):
     """bc.load ordering (stable sort by qid) plus aligned judge column."""
     data = {}
@@ -42,11 +45,16 @@ def load_with_judge(cand_dir):
         fp = os.path.join(cand_dir, f"{name}.csv")
         if not os.path.exists(fp):
             continue
+        side = {}
+        if JUDGE == "llm":
+            for r in csv.DictReader(open(os.path.join(cand_dir, f"{name}_llm.csv"))):
+                side[(r["qid"], r["docid"])] = float(r["llm_p_rel"])
         qids, X, rel, rr = [], [], [], []
         with open(fp) as f:
             for r in csv.DictReader(f):
                 qids.append(r["qid"]); X.append([float(r[k]) for k in bc.FEATS])
-                rel.append(int(float(r["relevant"]))); rr.append(float(r["rr_yes"]))
+                rel.append(int(float(r["relevant"])))
+                rr.append(side[(r["qid"], r["docid"])] if JUDGE == "llm" else float(r["rr_yes"]))
         X = np.asarray(X, np.float32); rel = np.asarray(rel, np.int8); rr = np.asarray(rr, np.float32)
         qids = np.asarray(qids)
         nG = {r["qid"]: int(r["nG"]) for r in csv.DictReader(open(os.path.join(cand_dir, f"{name}_meta.csv")))}
@@ -111,24 +119,36 @@ def fit_params(probe):
     return c_hat, tau_i, ratios
 
 
+def cutoffs(s, name, c, tau_i):
+    if name == "ad_probe":
+        return bc.gate_k(s["sp"], s["cump"], c * s["Sp"])
+    if name == "glob_probe":
+        return int(s["tau_ks"][tau_i])
+    return s["k_trunc"]
+
+
 def judge_diagnostics(H, HJ, rr_pairs, rel_pairs, c_star, tau_i):
-    """Population-level judge diagnostics for the frozen menu at (c_star, tau_i)."""
+    """Population-level judge diagnostics for the frozen menu at (c_star, tau_i):
+    pair-level accuracy, and for every policy pair the paired-difference
+    correlation rho and the judge error rate inside vs outside the
+    disagreement band (docs ranked between the two cutoffs)."""
     U = utils(H, c_star, tau_i); Uh = utils(HJ, c_star, tau_i)
     out = dict(judge_acc=float(((rr_pairs >= JUDGE_THR).astype(int) == rel_pairs).mean()))
     for a in range(len(MENU)):
         for b in range(a + 1, len(MENU)):
             d, dh = U[:, a] - U[:, b], Uh[:, a] - Uh[:, b]
-            out[f"rho_{MENU[a]}_vs_{MENU[b]}"] = float(np.corrcoef(d, dh)[0, 1]) if d.std() > 0 and dh.std() > 0 else float("nan")
-    # band error: docs between the two cutoffs of ad_probe(c_star) and glob(tau_i)
-    inb, outb = [], []
-    for s, sj in zip(H, HJ):
-        ka = bc.gate_k(s["sp"], s["cump"], c_star * s["Sp"]); kg = int(s["tau_ks"][tau_i])
-        lo, hi = min(ka, kg), max(ka, kg)
-        err = (sj["cumtp"] - np.r_[0, sj["cumtp"][:-1]]) != (s["cumtp"] - np.r_[0, s["cumtp"][:-1]])
-        inb.extend(err[lo:hi].tolist()); outb.extend(np.r_[err[:lo], err[hi:]].tolist())
-    out["judge_err_in_band"] = float(np.mean(inb)) if inb else float("nan")
-    out["judge_err_out_band"] = float(np.mean(outb)) if outb else float("nan")
-    out["band_frac"] = len(inb) / max(len(inb) + len(outb), 1)
+            key = f"{MENU[a]}_vs_{MENU[b]}"
+            out[f"rho_{key}"] = float(np.corrcoef(d, dh)[0, 1]) if d.std() > 0 and dh.std() > 0 else float("nan")
+            inb, outb = [], []
+            for s, sj in zip(H, HJ):
+                ka, kb = cutoffs(s, MENU[a], c_star, tau_i), cutoffs(s, MENU[b], c_star, tau_i)
+                lo, hi = min(ka, kb), max(ka, kb)
+                r_true = np.diff(np.r_[0, s["cumtp"]]); r_j = np.diff(np.r_[0, sj["cumtp"]])
+                err = r_true != r_j
+                inb.extend(err[lo:hi].tolist()); outb.extend(np.r_[err[:lo], err[hi:]].tolist())
+            out[f"err_in_{key}"] = float(np.mean(inb)) if inb else float("nan")
+            out[f"err_out_{key}"] = float(np.mean(outb)) if outb else float("nan")
+            out[f"band_frac_{key}"] = len(inb) / max(len(inb) + len(outb), 1)
     return out
 
 
@@ -137,8 +157,14 @@ def main():
     ap.add_argument("--pools", required=True); ap.add_argument("--stack", required=True)
     ap.add_argument("--repeats", type=int, default=50)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--names", nargs="+", default=None, help="collections (default: BEIR four)")
+    ap.add_argument("--judge", default="rr", choices=["rr", "llm"])
     a = ap.parse_args()
-    out = a.out or os.path.join(HUB, "05_results", "planner_v2", a.stack); os.makedirs(out, exist_ok=True)
+    global NAMES, JUDGE
+    JUDGE = a.judge
+    if a.names:
+        NAMES = a.names
+    out = a.out or os.path.join(HUB, "05_results", "planner_v2", a.stack + ("" if a.judge == "rr" else "_" + a.judge)); os.makedirs(out, exist_ok=True)
     cand_dir = os.path.join(a.pools, a.stack, "runs", "candidates")
     data = load_with_judge(cand_dir)
     rng_global = np.random.default_rng(0)
