@@ -59,22 +59,43 @@ certificate violated the premise in two ways: the candidate was chosen on the sa
 |M|−1 comparisons corrected (winner's curse; measured 0.049 vs budget 0.020 in synthetic data), and LOO-cross-fitted
 utilities are not independent across queries.
 
-## Proposition C (band localisation of decision-relevant judgments)
+## Proposition C (decision weights of documents) — corrected 2026-09-10
 
-For two cutoff policies j, m acting on the same ranked list, with retrieved sets R_j(q), R_m(q), and a utility that is
-additive over documents at fixed normaliser — precision-type utilities u_m(q) = (1/|R_m(q)|)Σ_{d∈R_m(q)} r(q,d), or
-recall-type utilities with known nG(q) — the difference u_j(q) − u_m(q) is a function of the relevance labels of the
-symmetric difference Δ_{jm}(q) = R_j(q) △ R_m(q) only. Hence (a) judge errors outside Δ_{jm}(q) do not affect
-D̂ − D, so ρ is governed by the judge's error inside the band; (b) a human audit of the pair-level differences needs
-labels only on Δ_{jm}(q), i.e. |Δ_{jm}(q)|/|pool(q)| of the judgments.
+**Erratum.** The earlier statement claimed band sufficiency for "precision-type utilities". That is false when the
+two cutoffs differ: with R_a = {a}, R_b = {a, b} and b irrelevant, precision(A) − precision(B) is 0.5 if a is relevant
+and 0 if not — the common document a matters because it carries weight 1/k_a − 1/k_b. The correct statement is in
+terms of per-document decision weights.
 
-Proof. Documents in R_j ∩ R_m contribute equally to both utilities and cancel in the difference; documents outside
-R_j ∪ R_m contribute to neither. ∎
+Setting. Two prefix policies a, b on the same ranked pool of q, cutoffs k_a ≤ k_b (w.l.o.g.), labels r(d) ∈ {0,1}.
+For a utility of the form u_m(q) = Σ_{d∈R_m} r(d) / Z_m(q), with Z_m a normaliser,
 
-Caveat (set-F1). For set-F1 the normaliser |R_m| + nG(q) requires nG(q), the total number of relevant documents in the
-pool, which depends on labels outside the band. Band localisation then holds only conditionally on nG(q); this is why
-§10 reports that recalibration (which needs nG) behaves differently from selection, and why a pair-level audit for
-set-F1 must add a PPI-corrected estimate of nG(q).
+   D(q) := u_a(q) − u_b(q) = Σ_d w(d) r(d),   w(d) = 1/Z_a − 1/Z_b  for d ∈ R_a ∩ R_b (common),
+                                            w(d) = −1/Z_b          for d ∈ R_b \ R_a (band),
+                                            w(d) = 0               otherwise,
+provided Z_a, Z_b do not depend on the labels (precision at cutoff: Z_m = k_m; net benefit: Z ≡ 1 with a per-document
+cost term; recall with a known nG: Z ≡ nG).
+
+(a) Exact band sufficiency holds iff Z_a = Z_b (equal cutoffs, or a common normaliser such as recall/nG or net benefit).
+(b) Otherwise the label of a common document enters with weight |1/Z_a − 1/Z_b|, which is small when the two cutoffs are
+close (for precision, (k_b − k_a)/(k_a k_b)) and never zero. The variance of D(q) contributed by a judge error on
+document d is w(d)²; hence the human budget should be spent in decreasing order of |w(d)|: band documents first, then
+common documents, never outside documents (for label-independent Z).
+(c) For set-F1, Z_m = k_m + nG(q) depends on the labels through nG(q); D(q) is then a ratio of label sums and neither
+band sufficiency nor exact linear weights hold. A linearisation around (n̂G, t̂p) gives approximate weights; the exact
+treatment estimates nG(q) separately (e.g. from a uniform label subsample with PPI correction).
+
+Consequence (decision-weighted doc-level auditing). Let π(d) be the inclusion probability of a human label on
+document d, chosen ∝ |w(d)| subject to a per-query budget, and ĵ(d) the judge's label. The estimators
+
+   D̂_HT(q)  = Σ_{d sampled} w(d) r(d) / π(d)                                   (humans only)
+   D̂_CV(q)  = Σ_d w(d) ĵ(d) + Σ_{d sampled} w(d) (r(d) − ĵ(d)) / π(d)          (judge as control variate)
+
+are unbiased for D(q) for any judge (Horvitz–Thompson; the control-variate correction is unbiased because the
+correction term is an HT estimator of Σ_d w(d)(r − ĵ)). Their variances are Σ_d w(d)² r(d)² (1−π)/π and
+Σ_d w(d)² (r(d) − ĵ(d))² (1−π)/π respectively: the judge helps exactly on the documents where it is right, weighted by
+decision weight. Query-level certificates (Prop. B′) then apply with D̂ in place of the fully audited D, and the
+human cost is the expected number of sampled documents, not the pool size. This is the method the earlier "band
+localisation" was reaching for; its unconditional part is (a)–(b), and its validity does not depend on the judge.
 
 ## What remains unproved / approximate
 - Time-uniform (anytime-valid) version: replace the Bonferroni-over-looks with a confidence sequence for the paired

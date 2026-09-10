@@ -1,0 +1,7 @@
+collection,judge,nA,budget_docs,eps,method,act,wrong
+dbpedia-entity,llm,30,1542.7067669172932,0.01,human_full,0.05,0.0
+dbpedia-entity,llm,30,1542.7067669172932,0.01,judge_ppi,0.08333333333333333,0.0
+dbpedia-entity,llm,30,1542.7067669172932,0.01,hybrid,0.016666666666666666,0.0
+dbpedia-entity,llm,60,3085.4135338345864,0.01,human_full,0.3,0.0
+dbpedia-entity,llm,60,3085.4135338345864,0.01,judge_ppi,0.31666666666666665,0.0
+dbpedia-entity,llm,60,3085.4135338345864,0.01,hybrid,0.16666666666666666,0.0
