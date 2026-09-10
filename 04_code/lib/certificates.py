@@ -122,6 +122,9 @@ def median_ci_exact(x, alpha):
     return float(x[k - 1]), float(x[n - k])
 
 
+LAMBDA_GUARD = False      # post-hoc deviation: lambda=0 unless it reduces the fitting fold's PPI variance by >= 5%
+
+
 def crossfit_lambda(d, dh, n_over_N=0.0):
     """Cross-fitted PPI++ tuning (deterministic halves): lambda for each half
     is estimated on the other half, removing the in-sample optimism of a
@@ -136,7 +139,13 @@ def crossfit_lambda(d, dh, n_over_N=0.0):
     for fit, apply in [(a, b), (b, a)]:
         v = dh[fit].var(ddof=1) if len(fit) > 1 else 0.0
         raw = np.cov(d[fit], dh[fit])[0, 1] / v if v > 0 and len(fit) > 1 else 0.0
-        lam[apply] = float(np.clip(raw / (1.0 + n_over_N), 0, 1))
+        l = float(np.clip(raw / (1.0 + n_over_N), 0, 1))
+        if LAMBDA_GUARD and len(fit) > 1:
+            base = d[fit].var(ddof=1)
+            with_l = (d[fit] - l * dh[fit]).var(ddof=1) + (l ** 2) * v * n_over_N
+            if base <= 0 or with_l > 0.95 * base:
+                l = 0.0
+        lam[apply] = l
     return lam
 
 
